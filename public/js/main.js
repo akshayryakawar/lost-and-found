@@ -1,5 +1,6 @@
 /**
  * Campus Lost & Found - Main Client Script
+ * Dark SaaS Redesign Enhancements
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -21,6 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize toast auto-trigger if flash messages exist
   initToasts();
+
+  // Initialize scroll reveal animations
+  initScrollReveal();
 });
 
 /**
@@ -36,7 +40,7 @@ function initImageUploadPreview() {
   if (!dropzone || !fileInput) return;
 
   dropzone.addEventListener('click', (e) => {
-    if (e.target !== removeBtn) {
+    if (e.target !== removeBtn && !e.target.closest('#uploadRemoveBtn')) {
       fileInput.click();
     }
   });
@@ -79,7 +83,7 @@ function initImageUploadPreview() {
 
   function showPreview(file) {
     if (!file.type.match('image.*')) {
-      alert('Please select an image file (PNG, JPG, JPEG, WEBP)');
+      showToast('Please select an image file (PNG, JPG, JPEG, WEBP)', 'danger');
       return;
     }
     const reader = new FileReader();
@@ -108,8 +112,8 @@ function initDuplicateCheck() {
   const sampleExistingItems = [
     { title: 'AirPods Pro with White Case', category: 'electronics', location: 'Main Campus Library' },
     { title: 'Black Leather Fossil Wallet', category: 'keys_wallets', location: 'Central Cafeteria' },
-    { title: 'Casio Scientific Calculator FX-991EX', category: 'electronics', location: 'Engineering Block B' },
-    { title: 'Silver Hydro Flask Water Bottle', category: 'accessories', location: 'Student Activity Center' }
+    { title: 'Casio Scientific Calculator FX-991EX', category: 'electronics', location: 'Engineering Quad' },
+    { title: 'Silver Hydro Flask Water Bottle', category: 'accessories', location: 'Student Center' }
   ];
 
   function checkSimilarity() {
@@ -192,6 +196,36 @@ function initDemoCredentials() {
 }
 
 /**
+ * Smooth Scroll Reveal with IntersectionObserver
+ */
+function initScrollReveal() {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return;
+  }
+
+  const elements = document.querySelectorAll('.item-card, .dashboard-stat-card, .category-bubble-card');
+  if (!elements || elements.length === 0) return;
+
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('revealed');
+        obs.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -40px 0px'
+  });
+
+  elements.forEach((el, index) => {
+    el.classList.add('reveal-fade-up');
+    el.style.transitionDelay = `${(index % 3) * 0.08}s`;
+    observer.observe(el);
+  });
+}
+
+/**
  * Toast Helper
  */
 function showToast(message, type = 'primary') {
@@ -208,9 +242,9 @@ function showToast(message, type = 'primary') {
     <div class="d-flex">
       <div class="toast-body d-flex align-items-center gap-2">
         <i class="bi bi-info-circle-fill text-${type}"></i>
-        <span>${message}</span>
+        <span class="text-white">${message}</span>
       </div>
-      <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
     </div>
   `;
 

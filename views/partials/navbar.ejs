@@ -1,160 +1,185 @@
-<header class="sticky-top">
-  <nav class="navbar navbar-expand-lg navbar-campus">
-    <div class="container">
-      <!-- Brand Logo -->
-      <a class="navbar-brand navbar-brand-wrapper" href="/">
-        <div class="brand-icon">
-          <i class="bi bi-box-seam"></i>
-        </div>
-        <div class="d-flex flex-column">
-          <span class="brand-title">Campus L&F</span>
-          <span class="brand-subtitle">University Portal</span>
-        </div>
+<header class="header-sticky">
+  <div class="container">
+    <div class="navbar-container">
+      
+      <!-- Left: Logo (Asterisk-style mark + Title) -->
+      <a class="brand-link" href="/" aria-label="Campus Lost and Found Homepage">
+        <span class="asterisk-mark" aria-hidden="true">&#10033;</span>
+        <span class="brand-text">Campus L&amp;F</span>
       </a>
 
-      <!-- Mobile Hamburger -->
-      <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMainContent" aria-controls="navbarMainContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+      <!-- Center: Pill-shaped Glassmorphism Dock (Desktop) -->
+      <nav class="nav-pill-dock d-none d-lg-flex" aria-label="Primary Navigation">
+        <a class="dock-link <%= typeof activePage !== 'undefined' && activePage === 'home' ? 'active' : '' %>" href="/">
+          Home
+        </a>
+        <a class="dock-link <%= typeof activePage !== 'undefined' && activePage === 'items' && typeof activeType === 'undefined' ? 'active' : '' %>" href="/items">
+          Browse All
+        </a>
+        <a class="dock-link <%= typeof activeType !== 'undefined' && activeType === 'lost' ? 'active' : '' %>" href="/items?type=lost">
+          Lost Items
+        </a>
+        <a class="dock-link <%= typeof activeType !== 'undefined' && activeType === 'found' ? 'active' : '' %>" href="/items?type=found">
+          Found Items
+        </a>
+      </nav>
 
-      <!-- Nav Links & Actions -->
-      <div class="collapse navbar-collapse" id="navbarMainContent">
-        <!-- Centered pill nav links -->
-        <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1">
-          <li class="nav-item">
-            <a class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'home' ? 'active' : '' %>" href="/">
-              Home
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link <%= typeof activePage !== 'undefined' && activePage === 'items' && typeof activeType === 'undefined' ? 'active' : '' %>" href="/items">
-              Browse All
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link <%= typeof activeType !== 'undefined' && activeType === 'lost' ? 'active' : '' %>" href="/items?type=lost">
-              Lost Items
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link <%= typeof activeType !== 'undefined' && activeType === 'found' ? 'active' : '' %>" href="/items?type=found">
-              Found Items
-            </a>
-          </li>
-        </ul>
+      <!-- Right: Action Buttons & Authentication -->
+      <div class="nav-actions">
+        
+        <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+          <!-- Notification Bell Icon -->
+          <a href="/notifications" class="nav-icon-btn" title="Campus Notifications" aria-label="View notifications">
+            <i class="bi bi-bell"></i>
+            <% if (typeof unreadCount !== 'undefined' && unreadCount > 0) { %>
+              <span class="nav-unread-dot" aria-label="<%= unreadCount %> unread notifications"></span>
+            <% } %>
+          </a>
 
-        <!-- Right action group -->
-        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <!-- Report Item Pill Dropdown -->
+          <div class="dropdown">
+            <button class="btn btn-pill-white dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <span>Report Item</span>
+              <span class="arrow-chip" aria-hidden="true">&nearr;</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-2" style="background: #181818; border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; min-width: 210px;">
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 py-2 rounded text-white" href="/items/report?type=lost" style="font-size: 0.88rem;">
+                  <span class="badge rounded-circle p-2" style="background: rgba(255,90,112,0.2); color: #ff5a70;"><i class="bi bi-search"></i></span>
+                  <div>
+                    <div class="fw-bold">I Lost Something</div>
+                    <small class="text-muted" style="font-size: 0.75rem;">Report missing belongings</small>
+                  </div>
+                </a>
+              </li>
+              <li><hr class="dropdown-divider my-1" style="border-color: rgba(255,255,255,0.08);"></li>
+              <li>
+                <a class="dropdown-item d-flex align-items-center gap-2 py-2 rounded text-white" href="/items/report?type=found" style="font-size: 0.88rem;">
+                  <span class="badge rounded-circle p-2" style="background: rgba(94,228,117,0.2); color: #5ee475;"><i class="bi bi-check2-circle"></i></span>
+                  <div>
+                    <div class="fw-bold">I Found Something</div>
+                    <small class="text-muted" style="font-size: 0.75rem;">Help reunite an item</small>
+                  </div>
+                </a>
+              </li>
+            </ul>
+          </div>
 
-          <% if (typeof currentUser !== 'undefined' && currentUser) { %>
-            <!-- Notification Bell -->
-            <a href="/notifications" class="notification-bell-btn text-decoration-none" title="Notifications">
-              <i class="bi bi-bell"></i>
-              <% if (typeof unreadCount !== 'undefined' && unreadCount > 0) { %>
-                <span class="notification-badge"><%= unreadCount %></span>
+          <!-- User Profile Dropdown -->
+          <div class="dropdown">
+            <button class="nav-icon-btn dropdown-toggle border-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="User Menu" style="background: rgba(255,255,255,0.12); color: #ffffff; font-weight: 700; font-size: 0.88rem;">
+              <%= currentUser.name.charAt(0).toUpperCase() %>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 p-2" style="background: #181818; border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; min-width: 220px;">
+              <li class="px-3 py-2 border-bottom mb-1" style="border-color: rgba(255,255,255,0.08) !important;">
+                <div class="fw-bold text-white small"><%= currentUser.name %></div>
+                <div class="text-muted small text-truncate" style="font-size: 0.78rem;"><%= currentUser.email %></div>
+                <span class="badge mt-1" style="background: <%= currentUser.role === 'admin' ? 'rgba(255,90,112,0.2)' : 'rgba(230,242,107,0.2)' %>; color: <%= currentUser.role === 'admin' ? '#ff5a70' : '#e6f26b' %>; font-size: 0.7rem;">
+                  <%= currentUser.role === 'admin' ? 'Campus Admin' : 'Student' %>
+                </span>
+              </li>
+              <li>
+                <a class="dropdown-item py-2 text-white rounded small" href="/dashboard">
+                  <i class="bi bi-speedometer2 me-2" style="color: var(--accent-cyan);"></i> My Dashboard
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item py-2 text-white rounded small" href="/dashboard#reports">
+                  <i class="bi bi-file-earmark-text me-2 text-muted"></i> My Reports
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item py-2 text-white rounded small" href="/dashboard#claims">
+                  <i class="bi bi-patch-check me-2" style="color: var(--accent-green);"></i> My Claims
+                </a>
+              </li>
+              <% if (currentUser.role === 'admin') { %>
+                <li><hr class="dropdown-divider my-1" style="border-color: rgba(255,255,255,0.08);"></li>
+                <li>
+                  <a class="dropdown-item py-2 text-danger fw-semibold rounded small" href="/admin">
+                    <i class="bi bi-shield-lock me-2"></i> Security Console
+                  </a>
+                </li>
               <% } %>
-            </a>
+              <li><hr class="dropdown-divider my-1" style="border-color: rgba(255,255,255,0.08);"></li>
+              <li>
+                <a class="dropdown-item py-2 text-danger rounded small" href="/auth/logout">
+                  <i class="bi bi-box-arrow-right me-2"></i> Sign Out
+                </a>
+              </li>
+            </ul>
+          </div>
 
-            <!-- Report dropdown -->
-            <div class="dropdown">
-              <button class="btn nav-btn-report dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-plus-circle"></i>
-                <span>Report</span>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2">
-                <li>
-                  <a class="dropdown-item d-flex align-items-center gap-2 py-2 rounded" href="/items/report?type=lost">
-                    <span style="width:28px;height:28px;border-radius:50%;background:rgba(248,113,113,.15);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#f87171;flex-shrink:0;"><i class="bi bi-search"></i></span>
-                    <div>
-                      <div class="fw-bold small" style="color:#fff;">I Lost Something</div>
-                      <small>Report your missing property</small>
-                    </div>
-                  </a>
-                </li>
-                <li><hr class="dropdown-divider my-1"></li>
-                <li>
-                  <a class="dropdown-item d-flex align-items-center gap-2 py-2 rounded" href="/items/report?type=found">
-                    <span style="width:28px;height:28px;border-radius:50%;background:rgba(52,211,153,.15);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#34d399;flex-shrink:0;"><i class="bi bi-hand-index-thumb"></i></span>
-                    <div>
-                      <div class="fw-bold small" style="color:#fff;">I Found Something</div>
-                      <small>Help reunite an item with its owner</small>
-                    </div>
-                  </a>
-                </li>
-              </ul>
-            </div>
+        <% } else { %>
+          <!-- Guest: Sign in link + White Pill Register button -->
+          <a href="/auth/login" class="nav-link-login">
+            Login
+          </a>
+          <a href="/auth/register" class="btn-pill-white">
+            <span>Register</span>
+            <span class="arrow-chip" aria-hidden="true">&nearr;</span>
+          </a>
+        <% } %>
 
-            <!-- User avatar dropdown -->
-            <div class="dropdown ms-1">
-              <button class="btn d-flex align-items-center gap-2 py-1 px-3 dropdown-toggle shadow-none" type="button"
-                data-bs-toggle="dropdown" aria-expanded="false"
-                style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:9999px;color:#fff;">
-                <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:26px;height:26px;font-size:.78rem;background:linear-gradient(135deg,#2dd4bf,#3b82f6);color:#0a0a0a;flex-shrink:0;">
-                  <%= currentUser.name.charAt(0).toUpperCase() %>
-                </div>
-                <span class="fw-semibold small text-truncate" style="max-width:100px;color:#fff;"><%= currentUser.name.split(' ')[0] %></span>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end p-2" style="min-width:220px;">
-                <li class="px-3 py-2 mb-1" style="border-bottom:1px solid rgba(255,255,255,.08);">
-                  <div class="fw-bold small" style="color:#fff;"><%= currentUser.name %></div>
-                  <div class="small text-truncate" style="color:rgba(255,255,255,.45);"><%= currentUser.email %></div>
-                  <span class="badge mt-1 small" style="background:<%= currentUser.role === 'admin' ? 'rgba(248,113,113,.15)' : 'rgba(45,212,191,.15)' %>;color:<%= currentUser.role === 'admin' ? '#f87171' : '#2dd4bf' %>;border:1px solid <%= currentUser.role === 'admin' ? 'rgba(248,113,113,.25)' : 'rgba(45,212,191,.25)' %>;">
-                    <%= currentUser.role === 'admin' ? 'Campus Admin' : 'Student' %>
-                  </span>
-                </li>
-                <li><a class="dropdown-item py-2 rounded" href="/dashboard"><i class="bi bi-speedometer2 me-2" style="color:#3b82f6;"></i>My Dashboard</a></li>
-                <li><a class="dropdown-item py-2 rounded" href="/dashboard#reports"><i class="bi bi-file-earmark-text me-2" style="color:rgba(255,255,255,.4);"></i>My Reports</a></li>
-                <li><a class="dropdown-item py-2 rounded" href="/dashboard#claims"><i class="bi bi-patch-check me-2" style="color:#34d399;"></i>My Claims</a></li>
-                <% if (currentUser.role === 'admin') { %>
-                  <li><hr class="dropdown-divider my-1"></li>
-                  <li><a class="dropdown-item py-2 rounded fw-semibold" href="/admin" style="color:#f87171;"><i class="bi bi-shield-check me-2"></i>Admin Panel</a></li>
-                <% } %>
-                <li><hr class="dropdown-divider my-1"></li>
-                <li><a class="dropdown-item py-2 rounded" href="/auth/logout" style="color:#f87171;"><i class="bi bi-box-arrow-right me-2"></i>Sign Out</a></li>
-              </ul>
-            </div>
+        <!-- Mobile Menu Button -->
+        <button class="mobile-nav-toggle d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileNavOffcanvas" aria-controls="mobileNavOffcanvas" aria-label="Toggle navigation">
+          <i class="bi bi-list"></i>
+        </button>
 
-          <% } else { %>
-            <!-- Guest: Report dropdown -->
-            <div class="dropdown">
-              <button class="btn nav-btn-report dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-plus-circle"></i>
-                <span>Report</span>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end shadow border-0 p-2">
-                <li>
-                  <a class="dropdown-item d-flex align-items-center gap-2 py-2 rounded" href="/items/report?type=lost">
-                    <span style="width:28px;height:28px;border-radius:50%;background:rgba(248,113,113,.15);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#f87171;flex-shrink:0;"><i class="bi bi-search"></i></span>
-                    <div>
-                      <div class="fw-bold small" style="color:#fff;">I Lost Something</div>
-                      <small>Report your missing property</small>
-                    </div>
-                  </a>
-                </li>
-                <li><hr class="dropdown-divider my-1"></li>
-                <li>
-                  <a class="dropdown-item d-flex align-items-center gap-2 py-2 rounded" href="/items/report?type=found">
-                    <span style="width:28px;height:28px;border-radius:50%;background:rgba(52,211,153,.15);display:flex;align-items:center;justify-content:center;font-size:.8rem;color:#34d399;flex-shrink:0;"><i class="bi bi-hand-index-thumb"></i></span>
-                    <div>
-                      <div class="fw-bold small" style="color:#fff;">I Found Something</div>
-                      <small>Help reunite an item with its owner</small>
-                    </div>
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <!-- Login ghost link -->
-            <a href="/auth/login" class="fw-semibold small" style="color:rgba(255,255,255,.6);transition:color .2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='rgba(255,255,255,.6)'">
-              Sign In
-            </a>
-            <!-- Register CTA -->
-            <a href="/auth/register" class="btn btn-sm rounded-pill fw-bold px-4" style="background:#fff;color:#0a0a0a;border:none;">
-              Register
-            </a>
-          <% } %>
-        </div>
       </div>
     </div>
-  </nav>
+  </div>
 </header>
+
+<!-- Mobile Offcanvas Menu -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="mobileNavOffcanvas" aria-labelledby="mobileNavOffcanvasLabel" style="background: #111111; color: #ffffff; border-left: 1px solid rgba(255,255,255,0.1);">
+  <div class="offcanvas-header border-bottom" style="border-color: rgba(255,255,255,0.08) !important;">
+    <h5 class="offcanvas-title d-flex align-items-center gap-2" id="mobileNavOffcanvasLabel">
+      <span class="asterisk-mark" style="font-size: 1.2rem;">&#10033;</span> Campus L&amp;F
+    </h5>
+    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body d-flex flex-column justify-content-between p-4">
+    <div class="d-flex flex-column gap-2">
+      <a href="/" class="dock-link <%= typeof activePage !== 'undefined' && activePage === 'home' ? 'active' : '' %> py-2 px-3">
+        <i class="bi bi-house me-2"></i> Home
+      </a>
+      <a href="/items" class="dock-link <%= typeof activePage !== 'undefined' && activePage === 'items' && typeof activeType === 'undefined' ? 'active' : '' %> py-2 px-3">
+        <i class="bi bi-grid me-2"></i> Browse All Items
+      </a>
+      <a href="/items?type=lost" class="dock-link <%= typeof activeType !== 'undefined' && activeType === 'lost' ? 'active' : '' %> py-2 px-3">
+        <i class="bi bi-exclamation-circle me-2 text-danger"></i> Lost Items
+      </a>
+      <a href="/items?type=found" class="dock-link <%= typeof activeType !== 'undefined' && activeType === 'found' ? 'active' : '' %> py-2 px-3">
+        <i class="bi bi-check-circle me-2 text-success"></i> Found Items
+      </a>
+      <hr style="border-color: rgba(255,255,255,0.08);">
+      <a href="/items/report?type=lost" class="btn btn-pill-ghost w-100 justify-content-center mb-2">
+        <i class="bi bi-search me-1"></i> Report Lost
+      </a>
+      <a href="/items/report?type=found" class="btn btn-pill-white w-100 justify-content-center">
+        <i class="bi bi-plus-circle me-1"></i> Report Found
+      </a>
+    </div>
+
+    <div class="pt-4 border-top" style="border-color: rgba(255,255,255,0.08) !important;">
+      <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 36px; height: 36px; background: #252525;">
+            <%= currentUser.name.charAt(0).toUpperCase() %>
+          </div>
+          <div>
+            <div class="fw-bold small text-white"><%= currentUser.name %></div>
+            <div class="text-muted small" style="font-size: 0.75rem;"><%= currentUser.email %></div>
+          </div>
+        </div>
+        <a href="/auth/logout" class="btn btn-sm btn-outline-danger w-100 rounded-pill">Sign Out</a>
+      <% } else { %>
+        <div class="d-flex gap-2">
+          <a href="/auth/login" class="btn btn-pill-ghost flex-grow-1 justify-content-center">Login</a>
+          <a href="/auth/register" class="btn btn-pill-white flex-grow-1 justify-content-center">Register</a>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>

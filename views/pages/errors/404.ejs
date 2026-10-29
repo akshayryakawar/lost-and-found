@@ -1,27 +1,31 @@
 <%- include('../../partials/head', { title: '404 - Page Not Found | Campus Lost & Found' }) %>
 <%- include('../../partials/navbar', { activePage: '' }) %>
 
-<main class="py-5">
-  <div class="container text-center py-5" style="max-width: 600px;">
+<main class="py-5 position-relative">
+  <!-- Subtle ambient glow -->
+  <div class="ambient-glow-wrapper">
+    <div class="ambient-glow-center" style="width: 500px; height: 500px;"></div>
+  </div>
+
+  <div class="container text-center py-5 position-relative" style="max-width: 620px; z-index: 5;">
     <div class="mb-4">
-      <div class="rounded-circle bg-danger-subtle text-danger d-inline-flex align-items-center justify-content-center" style="width: 88px; height: 88px; font-size: 2.75rem;">
-        <i class="bi bi-compass"></i>
-      </div>
+      <span class="asterisk-mark" style="font-size: 3.5rem; color: var(--accent-pink);">&#10033;</span>
     </div>
 
-    <h1 class="display-5 fw-bold text-white mb-2">Lost on Campus?</h1>
-    <h2 class="h5 text-muted mb-4">404 - The page or item you are looking for cannot be found.</h2>
+    <h1 class="display-4 fw-bold text-white mb-2" style="letter-spacing: -0.04em;">Lost on Campus?</h1>
+    <h2 class="h5 text-muted mb-4">404 &mdash; The page or belonging you are seeking cannot be located.</h2>
 
-    <p class="text-secondary mb-4">
-      The link you followed may be broken, expired, or the item report may have been archived after being safely returned to its owner.
+    <p class="text-muted mb-4" style="line-height: 1.7;">
+      The link you followed may be broken, or the item report may have been archived after being safely reunited with its rightful owner.
     </p>
 
     <div class="d-flex justify-content-center gap-3">
-      <a href="/" class="btn btn-primary rounded-pill px-4 fw-semibold">
-        <i class="bi bi-house-door me-1"></i> Return to Homepage
+      <a href="/" class="btn-pill-white">
+        <span>Return to Homepage</span>
+        <span class="arrow-chip">&rarr;</span>
       </a>
-      <a href="/items" class="btn btn-outline-secondary rounded-pill px-4">
-        <i class="bi bi-search me-1"></i> Browse Catalog
+      <a href="/items" class="btn-pill-ghost">
+        <span>Browse Catalog</span>
       </a>
     </div>
   </div>

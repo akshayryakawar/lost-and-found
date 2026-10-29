@@ -1,201 +1,239 @@
 <%- include('../partials/head', { title: 'Campus Lost & Found | Official University Portal' }) %>
 <%- include('../partials/navbar', { activePage: 'home' }) %>
 
-<main>
-  <!-- ====================================================
-       HERO SECTION
-       ==================================================== -->
+<main class="position-relative">
+  <!-- Ambient Radial Glows & Subtle Texture -->
+  <div class="ambient-glow-wrapper">
+    <div class="ambient-glow-top"></div>
+    <div class="ambient-glow-center"></div>
+    <div class="starfield-texture"></div>
+  </div>
+
+  <!-- =========================================================================
+       HERO SECTION WITH FLOATING CHIPS & SIGNATURE CARD FAN
+       ========================================================================= -->
   <section class="hero-section">
-    <div class="container position-relative">
-      <div class="row align-items-center gy-5">
-        <div class="col-lg-7">
+    <!-- Floating Cursor Name-Tag Chips & 3D Shapes -->
+    <div class="hero-floating-elements d-none d-lg-block">
+      <!-- Teal Chip (Left) -->
+      <a href="/items?type=found" class="floating-cursor-chip chip-teal" title="View Found AirPods">
+        <svg class="chip-cursor-svg" viewBox="0 0 24 24">
+          <path d="M4 3l15 8-6 2-2 6z"/>
+        </svg>
+        <span>Found: AirPods Pro</span>
+      </a>
 
-          <!-- Early-access pill badge -->
-          <div class="hero-pill mb-4">
-            <span style="width:8px;height:8px;background:#fbbf24;border-radius:50%;display:inline-block;"></span>
-            Official Campus Recovery Network &mdash; Now Live
-          </div>
+      <!-- Coral Pink Chip (Right) -->
+      <a href="/items?type=lost" class="floating-cursor-chip chip-pink" title="View Lost Wallet">
+        <svg class="chip-cursor-svg" viewBox="0 0 24 24" style="transform: rotate(90deg);">
+          <path d="M4 3l15 8-6 2-2 6z"/>
+        </svg>
+        <span>Lost: Leather Wallet</span>
+      </a>
 
-          <!-- Floating avatar badges above title -->
-          <div class="hero-avatar-badges mb-3">
-            <span class="avatar-badge avatar-badge-teal">
-              <span class="avatar-badge-icon">A</span>
-              Alex recovered his AirPods
-            </span>
-            <span class="avatar-badge avatar-badge-pink">
-              <span class="avatar-badge-icon">R</span>
-              Riya found her Student ID
-            </span>
-            <span class="avatar-badge avatar-badge-purple">
-              <span class="avatar-badge-icon">K</span>
-              Karan got his wallet back
-            </span>
-          </div>
+      <!-- Floating 3D Decorative Megaphone -->
+      <div class="floating-3d-shape shape-megaphone">
+        <svg viewBox="0 0 80 80" width="100%" height="100%">
+          <defs>
+            <linearGradient id="megaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#38e1ff"/>
+              <stop offset="100%" stop-color="#12b0e8"/>
+            </linearGradient>
+          </defs>
+          <path d="M20 30 L45 15 L45 65 L20 50 Z" fill="url(#megaGrad)" opacity="0.9"/>
+          <ellipse cx="45" cy="40" rx="8" ry="25" fill="#5ee475"/>
+          <rect x="14" y="34" width="8" height="12" rx="3" fill="#ffffff" opacity="0.8"/>
+        </svg>
+      </div>
 
-          <!-- Big hero title -->
-          <h1 class="hero-title">
-            Lost something<br>on campus?
-            <span class="hero-title-accent">Let&rsquo;s get it back.</span>
-          </h1>
+      <!-- Floating 3D Decorative Monitor -->
+      <div class="floating-3d-shape shape-monitor">
+        <svg viewBox="0 0 80 80" width="100%" height="100%">
+          <defs>
+            <linearGradient id="monGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#ff6b81"/>
+              <stop offset="100%" stop-color="#7b5cff"/>
+            </linearGradient>
+          </defs>
+          <rect x="15" y="15" width="50" height="38" rx="8" fill="url(#monGrad)"/>
+          <rect x="20" y="20" width="40" height="28" rx="4" fill="#141414"/>
+          <path d="M35 53 L45 53 L48 64 L32 64 Z" fill="#ffffff" opacity="0.7"/>
+        </svg>
+      </div>
+    </div>
 
-          <p class="hero-subtitle mt-3">
-            The official central registry for lost and found belongings across all faculties, libraries, student halls, and athletic facilities.
-          </p>
+    <div class="container position-relative" style="z-index: 5;">
+      <!-- Small Eyebrow Label -->
+      <div class="hero-eyebrow">
+        <span class="eyebrow-icon">&#9679;</span>
+        <span>Live Campus Recovery Network &mdash; Lose Nothing, Find Everything</span>
+      </div>
 
-          <!-- Quick action buttons -->
-          <div class="d-flex flex-wrap gap-3 mb-4">
-            <a href="/items/report?type=lost" class="btn btn-danger btn-lg px-4 rounded-pill d-flex align-items-center gap-2">
-              <i class="bi bi-search"></i>
-              <span>Report Lost Item</span>
-            </a>
-            <a href="/items/report?type=found" class="btn btn-success btn-lg px-4 rounded-pill d-flex align-items-center gap-2">
-              <i class="bi bi-plus-circle"></i>
-              <span>Report Found Item</span>
-            </a>
-            <a href="/items" class="btn btn-outline-dark btn-lg px-4 rounded-pill">
-              Browse All Items
-            </a>
-          </div>
+      <!-- Two-line Big Headline -->
+      <h1 class="hero-headline">
+        Lose Nothing.
+        <span class="hero-accent-serif">Find Everything.</span>
+      </h1>
 
-          <!-- Hero search card -->
-          <div class="hero-search-card">
-            <form action="/items" method="GET" class="row g-2 align-items-center">
-              <div class="col-md-5">
-                <div class="input-group">
-                  <span class="input-group-text bg-transparent border-0" style="color:rgba(255,255,255,.35);"><i class="bi bi-search"></i></span>
-                  <input type="text" name="search" class="form-control border-0 shadow-none ps-0" placeholder="Search keywords (e.g. AirPods, keys, wallet)..." style="background:transparent;color:#fff;">
+      <!-- Muted Subtitle -->
+      <p class="hero-subtitle">
+        A campus space where lost belongings find their way home &mdash; report, track, and safely claim items across all student halls, libraries, and facilities in seconds.
+      </p>
+
+      <!-- Primary Action Buttons -->
+      <div class="hero-cta-group">
+        <a href="/items/report" class="btn-pill-white">
+          <span>Report an Item</span>
+          <span class="arrow-chip" aria-hidden="true">&nearr;</span>
+        </a>
+        <a href="/items" class="btn-pill-ghost">
+          <span>Browse All Items</span>
+        </a>
+      </div>
+
+      <!-- =====================================================================
+           SIGNATURE CARD FAN (HERO CAROUSEL)
+           ===================================================================== -->
+      <div class="card-fan-section">
+        <div class="card-fan-container" id="heroCardFan">
+          
+          <% 
+            // Build 5 visual cards combining real items and themed backups
+            const sampleFanPresets = [
+              { title: 'AirPods Pro', category: 'Electronics', colorClass: 'fan-card-1', icon: 'bi-headphones', img: '/images/sample-airpods.jpg' },
+              { title: 'Student ID', category: 'Cards & Badges', colorClass: 'fan-card-2', icon: 'bi-person-badge', img: '/images/sample-id.jpg' },
+              { title: 'Smart Watch', category: 'Accessories', colorClass: 'fan-card-3', icon: 'bi-smartwatch', img: '/images/sample-watch.jpg' },
+              { title: 'Notebook & Pen', category: 'Courseware', colorClass: 'fan-card-4', icon: 'bi-journal-bookmark', img: '/images/sample-book.jpg' },
+              { title: 'Leather Wallet', category: 'Keys & Wallets', colorClass: 'fan-card-5', icon: 'bi-wallet2', img: '/images/sample-wallet.jpg' }
+            ];
+
+            const cardsToRender = [];
+            for (let i = 0; i < 5; i++) {
+              if (recentItems && recentItems[i]) {
+                cardsToRender.push({
+                  id: recentItems[i].id || recentItems[i]._id,
+                  title: recentItems[i].title,
+                  category: (recentItems[i].category || 'Campus Item').replace('_', ' '),
+                  colorClass: `fan-card-${i + 1}`,
+                  imageUrl: recentItems[i].imageUrl || recentItems[i].image_url,
+                  type: recentItems[i].type
+                });
+              } else {
+                cardsToRender.push({
+                  id: null,
+                  title: sampleFanPresets[i].title,
+                  category: sampleFanPresets[i].category,
+                  colorClass: sampleFanPresets[i].colorClass,
+                  icon: sampleFanPresets[i].icon,
+                  imageUrl: null,
+                  type: 'found'
+                });
+              }
+            }
+          %>
+
+          <% cardsToRender.forEach((card, index) => { %>
+            <a href="<%= card.id ? '/items/' + card.id : '/items' %>" class="fan-card <%= card.colorClass %>" aria-label="View <%= card.title %>">
+              <div class="fan-card-header">
+                <div class="fan-card-title text-truncate"><%= card.title %></div>
+                <div class="fan-card-subtitle"><%= card.category %></div>
+              </div>
+
+              <% if (index === 2) { %>
+                <!-- Center Prominent Card "Get Started" chip -->
+                <div class="fan-center-pill">
+                  <span>Get Started</span>
+                  <span class="arrow-chip">&nearr;</span>
                 </div>
-              </div>
-              <div class="col-md-3">
-                <select name="type" class="form-select border-0 shadow-none" style="background:transparent;color:rgba(255,255,255,.7);">
-                  <option value="" style="background:#1f1f1f;">All Types</option>
-                  <option value="lost" style="background:#1f1f1f;">Lost Items</option>
-                  <option value="found" style="background:#1f1f1f;">Found Items</option>
-                </select>
-              </div>
-              <div class="col-md-4">
-                <button type="submit" class="btn btn-primary w-100 rounded-pill fw-semibold py-2">
-                  <i class="bi bi-arrow-right-circle me-1"></i> Search
-                </button>
-              </div>
-            </form>
-          </div>
+              <% } %>
 
-          <!-- Stats strip -->
-          <div class="hero-stats-banner">
-            <div class="stat-item">
-              <h3><%= stats.totalItems %>+</h3>
-              <p>Items Logged</p>
-            </div>
-            <div class="stat-item">
-              <h3><%= stats.returnedItems %></h3>
-              <p>Reunited Owners</p>
-            </div>
-            <div class="stat-item">
-              <h3><%= stats.activeClaims %></h3>
-              <p>Active Inquiries</p>
-            </div>
-            <div class="stat-item">
-              <h3>94%</h3>
-              <p>Resolution Rate</p>
-            </div>
+              <div class="fan-card-artwork">
+                <% if (card.imageUrl) { %>
+                  <img src="<%= card.imageUrl %>" alt="<%= card.title %>" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'fan-artwork-fallback\'><i class=\'bi bi-box-seam\'></i></div>';">
+                <% } else { %>
+                  <div class="fan-artwork-fallback">
+                    <i class="bi <%= card.icon || 'bi-box-seam' %>"></i>
+                  </div>
+                <% } %>
+              </div>
+            </a>
+          <% }); %>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       LIVE STATS STRIP
+       ========================================================================= -->
+  <section class="stats-strip-container">
+    <div class="container">
+      <div class="row g-4 align-items-center justify-content-center">
+        <div class="col-6 col-md-3">
+          <div class="stat-box">
+            <div class="stat-number"><%= (typeof stats !== 'undefined' && stats && stats.totalItems) ? stats.totalItems : 0 %>+</div>
+            <div class="stat-label">Items Logged</div>
           </div>
         </div>
-
-        <!-- Right: dark live activity card -->
-        <div class="col-lg-5 d-none d-lg-block">
-          <div class="hero-live-card">
-            <div class="hero-live-card-header">
-              <span class="fw-bold" style="color:#fff;font-size:.9rem;">
-                <i class="bi bi-activity me-2" style="color:#2dd4bf;"></i>Live Campus Activity
-              </span>
-              <span class="d-flex align-items-center gap-1" style="font-size:.75rem;font-weight:700;color:#34d399;">
-                <span style="width:7px;height:7px;border-radius:50%;background:#34d399;animation:pulse 2s infinite;"></span>
-                Real-time
-              </span>
-            </div>
-
-            <div class="live-feed-item lost">
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="badge rounded-pill" style="background:rgba(248,113,113,.15);color:#f87171;font-size:.68rem;border:1px solid rgba(248,113,113,.25);">LOST</span>
-                <small>12 mins ago</small>
-              </div>
-              <div class="fw-bold">Black Sony WH-1000XM4 Headphones</div>
-              <small><i class="bi bi-geo-alt me-1"></i>Science Library, 3rd Floor</small>
-            </div>
-
-            <div class="live-feed-item found">
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="badge rounded-pill" style="background:rgba(52,211,153,.15);color:#34d399;font-size:.68rem;border:1px solid rgba(52,211,153,.25);">FOUND</span>
-                <small>45 mins ago</small>
-              </div>
-              <div class="fw-bold">Student ID Card — Engineering Dept.</div>
-              <small><i class="bi bi-geo-alt me-1"></i>Dining Hall Tray Return</small>
-            </div>
-
-            <div class="live-feed-item returned">
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="badge rounded-pill" style="background:rgba(59,130,246,.15);color:#3b82f6;font-size:.68rem;border:1px solid rgba(59,130,246,.25);">REUNITED</span>
-                <small>2 hours ago</small>
-              </div>
-              <div class="fw-bold">Hydro Flask Water Bottle (Teal)</div>
-              <small><i class="bi bi-check-circle me-1" style="color:#34d399;"></i>Handed over at Security Dispatch</small>
-            </div>
-
-            <div class="live-feed-item lost">
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="badge rounded-pill" style="background:rgba(248,113,113,.15);color:#f87171;font-size:.68rem;border:1px solid rgba(248,113,113,.25);">LOST</span>
-                <small>3 hours ago</small>
-              </div>
-              <div class="fw-bold">MacBook Pro Charger (MagSafe)</div>
-              <small><i class="bi bi-geo-alt me-1"></i>Main Library Study Pods</small>
-            </div>
-
-            <div class="mt-3 pt-3 text-center" style="border-top:1px solid rgba(255,255,255,.07);">
-              <a href="/items" class="small fw-semibold" style="color:#2dd4bf;text-decoration:none;">
-                Explore all verified items <i class="bi bi-arrow-right ms-1"></i>
-              </a>
-            </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-box">
+            <div class="stat-number" style="color: var(--accent-lime);"><%= (typeof stats !== 'undefined' && stats && stats.returnedItems) ? stats.returnedItems : 0 %></div>
+            <div class="stat-label">Reunited Owners</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-box">
+            <div class="stat-number"><%= (typeof stats !== 'undefined' && stats && stats.activeClaims) ? stats.activeClaims : 0 %></div>
+            <div class="stat-label">Active Claims</div>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="stat-box">
+            <div class="stat-number" style="color: var(--accent-cyan);">94%</div>
+            <div class="stat-label">Success Rate</div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ====================================================
-       CATEGORIES SECTION
-       ==================================================== -->
-  <section class="py-5 section-dark-alt">
+  <!-- =========================================================================
+       BROWSE BY CATEGORY
+       ========================================================================= -->
+  <section class="py-5">
     <div class="container">
-      <div class="d-flex justify-content-between align-items-end mb-4">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
         <div>
-          <p class="section-label mb-1">Quick Browse</p>
-          <h2 class="fs-3 fw-bold mb-1" style="color:#fff;">Browse by Category</h2>
-          <p class="small mb-0" style="color:rgba(255,255,255,.4);">Jump straight to what you&rsquo;re looking for</p>
+          <span class="small fw-bold text-uppercase" style="color: var(--accent-lime); letter-spacing: 0.08em;">Categories</span>
+          <h2 class="h3 fw-bold text-white mb-1">Browse by Belonging Type</h2>
+          <p class="text-muted small mb-0">Quickly filter catalog by university gear classification</p>
         </div>
-        <a href="/items" class="btn btn-outline-dark btn-sm rounded-pill fw-semibold">
-          View All <i class="bi bi-arrow-right ms-1"></i>
+        <a href="/items" class="btn-pill-ghost btn-sm mt-3 mt-md-0">
+          <span>View All Categories</span>
+          <span class="arrow-chip" style="width: 18px; height: 18px; font-size: 0.65rem;">&rarr;</span>
         </a>
       </div>
 
       <div class="row g-3">
         <% const categoriesList = [
-          { key: 'electronics',    name: 'Electronics',         icon: 'bi-laptop',        count: 18 },
-          { key: 'id_cards',       name: 'Student IDs & Cards', icon: 'bi-person-badge',  count: 24 },
-          { key: 'keys_wallets',   name: 'Keys & Wallets',      icon: 'bi-key',           count: 15 },
-          { key: 'bags_backpacks', name: 'Bags & Backpacks',    icon: 'bi-backpack',      count: 9 },
-          { key: 'books_notes',    name: 'Books & Notes',       icon: 'bi-book',          count: 12 },
-          { key: 'clothing',       name: 'Clothing & Accessories', icon: 'bi-sunglasses', count: 8 }
+          { key: 'electronics', name: 'Electronics', icon: 'bi-laptop', count: 18 },
+          { key: 'id_cards', name: 'Student IDs & Cards', icon: 'bi-person-badge', count: 24 },
+          { key: 'keys_wallets', name: 'Keys & Wallets', icon: 'bi-key', count: 15 },
+          { key: 'bags_backpacks', name: 'Bags & Backpacks', icon: 'bi-backpack', count: 9 },
+          { key: 'books_notes', name: 'Books & Notes', icon: 'bi-journal-code', count: 12 },
+          { key: 'clothing', name: 'Clothing & Jackets', icon: 'bi-sunglasses', count: 8 }
         ]; %>
 
         <% categoriesList.forEach(cat => { %>
           <div class="col-6 col-md-4 col-lg-2">
-            <a href="/items?category=<%= cat.key %>" class="category-card">
-              <div class="category-icon">
+            <a href="/items?category=<%= cat.key %>" class="category-bubble-card">
+              <div class="category-bubble-icon">
                 <i class="bi <%= cat.icon %>"></i>
               </div>
-              <div class="category-name"><%= cat.name %></div>
-              <div class="category-count"><%= cat.count %> items listed</div>
+              <div class="category-bubble-name"><%= cat.name %></div>
+              <div class="category-bubble-count"><%= cat.count %> listed</div>
             </a>
           </div>
         <% }); %>
@@ -203,88 +241,100 @@
     </div>
   </section>
 
-  <!-- ====================================================
-       RECENT ITEMS
-       ==================================================== -->
-  <section class="py-5">
+  <!-- =========================================================================
+       RECENT LOST & FOUND REPORTS
+       ========================================================================= -->
+  <section class="py-5" style="background: rgba(14, 14, 14, 0.6); border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle);">
     <div class="container">
       <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
         <div>
-          <p class="section-label mb-1">Recently Added</p>
-          <h2 class="fs-3 fw-bold mb-1" style="color:#fff;">Latest Lost &amp; Found Reports</h2>
-          <p class="small mb-0" style="color:rgba(255,255,255,.4);">Review recent entries or search using the filters above</p>
+          <span class="small fw-bold text-uppercase" style="color: var(--accent-cyan); letter-spacing: 0.08em;">Live Feed</span>
+          <h2 class="h3 fw-bold text-white mb-1">Recent Campus Reports</h2>
+          <p class="text-muted small mb-0">Real-time submissions from students and campus security</p>
         </div>
+
         <div class="d-flex gap-2">
-          <a href="/items?type=lost" class="btn btn-outline-danger btn-sm rounded-pill px-3">
-            <i class="bi bi-search me-1"></i> Lost (<%= stats.lostCount %>)
+          <a href="/items?type=lost" class="btn btn-sm rounded-pill px-3" style="background: rgba(255,90,112,0.15); color: #ff5a70; border: 1px solid rgba(255,90,112,0.3); font-weight: 600;">
+            <i class="bi bi-search me-1"></i> Lost (<%= (typeof stats !== 'undefined' && stats && stats.lostCount) ? stats.lostCount : 0 %>)
           </a>
-          <a href="/items?type=found" class="btn btn-outline-success btn-sm rounded-pill px-3">
-            <i class="bi bi-check-circle me-1"></i> Found (<%= stats.foundCount %>)
+          <a href="/items?type=found" class="btn btn-sm rounded-pill px-3" style="background: rgba(94,228,117,0.15); color: #5ee475; border: 1px solid rgba(94,228,117,0.3); font-weight: 600;">
+            <i class="bi bi-check-circle me-1"></i> Found (<%= (typeof stats !== 'undefined' && stats && stats.foundCount) ? stats.foundCount : 0 %>)
           </a>
         </div>
       </div>
 
-      <div class="row g-3">
+      <div class="row g-4">
         <% if (recentItems && recentItems.length > 0) { %>
           <% recentItems.forEach(item => { %>
             <%- include('../partials/item-card', { item: item }) %>
           <% }); %>
         <% } else { %>
           <div class="col-12">
-            <div class="empty-state-box">
-              <div class="empty-state-icon"><i class="bi bi-inbox"></i></div>
-              <h4 style="color:#fff;">No items reported recently</h4>
-              <p style="color:rgba(255,255,255,.4);">Be the first to submit a report if you lost or found something on campus.</p>
-              <a href="/items/report" class="btn btn-primary rounded-pill px-4 mt-2">Submit Report</a>
+            <div class="text-center py-5 p-4 rounded-4" style="background: var(--bg-surface); border: 1px dashed var(--border-medium);">
+              <i class="bi bi-inbox display-4 text-muted mb-3 d-block"></i>
+              <h4 class="text-white fw-bold">No items reported yet</h4>
+              <p class="text-muted small">Be the first to log a found or missing item in your student community.</p>
+              <a href="/items/report" class="btn-pill-white mt-2">Submit a Report</a>
             </div>
           </div>
         <% } %>
       </div>
 
       <div class="text-center mt-5">
-        <a href="/items" class="btn btn-outline-dark px-5 py-2 rounded-pill fw-semibold">
-          Browse All <%= stats.totalItems %> Items <i class="bi bi-arrow-right ms-2"></i>
+        <a href="/items" class="btn-pill-ghost px-5 py-2">
+          <span>Explore All <%= (typeof stats !== 'undefined' && stats && stats.totalItems) ? stats.totalItems : 0 %> Items in Directory</span>
+          <span class="arrow-chip">&rarr;</span>
         </a>
       </div>
     </div>
   </section>
 
-  <!-- ====================================================
-       HOW IT WORKS
-       ==================================================== -->
-  <section class="py-5 section-dark-alt" id="howItWorks">
-    <div class="container">
+  <!-- =========================================================================
+       HOW IT WORKS SECTION
+       ========================================================================= -->
+  <section class="py-5" id="howItWorks">
+    <div class="container py-4">
       <div class="text-center mb-5">
-        <p class="section-label">Simple &amp; Secure</p>
-        <h2 class="fs-3 fw-bold mb-2" style="color:#fff;">How Campus Recovery Works</h2>
-        <p style="color:rgba(255,255,255,.45);max-width:500px;margin:0 auto;">Follow these 3 simple steps to find, claim, or return lost property on campus.</p>
+        <span class="small fw-bold text-uppercase" style="color: var(--accent-lime); letter-spacing: 0.08em;">Workflow</span>
+        <h2 class="h2 fw-bold text-white mb-2">How Campus Recovery Works</h2>
+        <p class="text-muted mx-auto" style="max-width: 540px;">
+          Designed for maximum student safety and rapid reunions with verifiable security safeguards.
+        </p>
       </div>
 
-      <div class="row g-4">
+      <div class="row g-4 text-center">
         <div class="col-md-4">
-          <div class="how-step-card">
-            <div class="how-step-number">1</div>
-            <h4 class="fs-5 fw-bold mb-2" style="color:#fff;">Report or Search</h4>
-            <p class="small mb-0" style="color:rgba(255,255,255,.45);">
-              Lost an item? Submit a detailed description and photo. Found something? Log it to notify potential owners across campus immediately.
+          <div class="p-4 rounded-4 h-100" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); transition: var(--transition-smooth);">
+            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 58px; height: 58px; background: rgba(230,242,107,0.12); color: var(--accent-lime); font-size: 1.4rem; font-weight: 800; border: 1px solid rgba(230,242,107,0.3);">
+              1
+            </div>
+            <h4 class="h5 fw-bold text-white mb-2">Report &amp; Search</h4>
+            <p class="text-muted small mb-0">
+              Post photos and distinguishing traits. Instant duplicate detection cross-checks across all active faculty logs automatically.
             </p>
           </div>
         </div>
+
         <div class="col-md-4">
-          <div class="how-step-card">
-            <div class="how-step-number">2</div>
-            <h4 class="fs-5 fw-bold mb-2" style="color:#fff;">Verify &amp; Claim</h4>
-            <p class="small mb-0" style="color:rgba(255,255,255,.45);">
-              Submit proof of ownership — unique markings, serial numbers, or lock-screen details — to prevent unauthorized pickups.
+          <div class="p-4 rounded-4 h-100" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); transition: var(--transition-smooth);">
+            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 58px; height: 58px; background: rgba(25,181,232,0.12); color: var(--accent-cyan); font-size: 1.4rem; font-weight: 800; border: 1px solid rgba(25,181,232,0.3);">
+              2
+            </div>
+            <h4 class="h5 fw-bold text-white mb-2">Verify &amp; Claim</h4>
+            <p class="text-muted small mb-0">
+              Submit proof of ownership &mdash; such as unique markings, lock screen patterns, or serial numbers &mdash; to prevent unauthorized handovers.
             </p>
           </div>
         </div>
+
         <div class="col-md-4">
-          <div class="how-step-card">
-            <div class="how-step-number">3</div>
-            <h4 class="fs-5 fw-bold mb-2" style="color:#fff;">Collect Safely</h4>
-            <p class="small mb-0" style="color:rgba(255,255,255,.45);">
-              Once approved by campus security, collect your item at the Student Center Security Dispatch Desk with your student ID.
+          <div class="p-4 rounded-4 h-100" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); transition: var(--transition-smooth);">
+            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 58px; height: 58px; background: rgba(94,228,117,0.12); color: var(--accent-green); font-size: 1.4rem; font-weight: 800; border: 1px solid rgba(94,228,117,0.3);">
+              3
+            </div>
+            <h4 class="h5 fw-bold text-white mb-2">Collect Safely</h4>
+            <p class="text-muted small mb-0">
+              Once verified by campus security, collect your belongings with your student ID at the Central Security Dispatch Desk.
             </p>
           </div>
         </div>
@@ -292,28 +342,31 @@
     </div>
   </section>
 
-  <!-- ====================================================
-       CTA BANNER
-       ==================================================== -->
+  <!-- =========================================================================
+       CAMPUS CUSTODY & PHYSICAL RETRIEVAL VAULT
+       ========================================================================= -->
   <section class="py-5">
     <div class="container">
-      <div class="cta-banner">
+      <div class="p-4 p-md-5 rounded-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #161616 0%, #1e1e1e 100%); border: 1px solid rgba(255,255,255,0.12); box-shadow: var(--shadow-card);">
         <div class="row align-items-center">
           <div class="col-lg-8">
-            <span class="badge rounded-pill fw-bold mb-3" style="background:rgba(45,212,191,.15);color:#2dd4bf;border:1px solid rgba(45,212,191,.25);padding:.4rem .9rem;">Official Campus Custody</span>
-            <h2 class="fw-bold fs-3 mb-2" style="color:#fff;">Physical Drop-Off &amp; Retrieval Location</h2>
-            <p class="mb-4" style="color:rgba(255,255,255,.45);">
-              All high-value items (wallets, laptops, phones, government IDs) handed to campus staff are securely held in the Central Security Vault at the Student Center.
+            <span class="badge rounded-pill px-3 py-2 fw-bold mb-3" style="background: rgba(230,242,107,0.15); color: var(--accent-lime); border: 1px solid rgba(230,242,107,0.3);">
+              Physical Campus Custody
+            </span>
+            <h2 class="h3 fw-bold text-white mb-2">Student Center Central Retrieval Desk</h2>
+            <p class="text-muted mb-4" style="max-width: 620px;">
+              All high-value items (wallets, laptops, phones, student ID cards) reported as found are securely held in the Central Security Vault at the Student Center.
             </p>
-            <div class="d-flex flex-wrap gap-4 small" style="color:rgba(255,255,255,.4);">
-              <div><i class="bi bi-geo-alt-fill me-2" style="color:#fbbf24;"></i>Student Center, Ground Floor, Room 102</div>
-              <div><i class="bi bi-clock-fill me-2" style="color:#fbbf24;"></i>Mon–Fri &nbsp;8:00 AM – 6:00 PM</div>
-              <div><i class="bi bi-shield-check me-2" style="color:#fbbf24;"></i>Student ID verification required</div>
+            <div class="d-flex flex-wrap gap-4 small text-muted">
+              <div><i class="bi bi-geo-alt-fill me-2" style="color: var(--accent-pink);"></i> Student Center, Room 102</div>
+              <div><i class="bi bi-clock-fill me-2" style="color: var(--accent-cyan);"></i> Mon-Fri 8:00 AM &ndash; 6:00 PM</div>
+              <div><i class="bi bi-shield-check me-2" style="color: var(--accent-lime);"></i> Student ID required</div>
             </div>
           </div>
           <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-            <a href="/items/report?type=found" class="btn btn-lg px-5 rounded-pill fw-bold" style="background:#fff;color:#0a0a0a;box-shadow:0 4px 20px rgba(255,255,255,.12);">
-              Hand In an Item
+            <a href="/items/report?type=found" class="btn-pill-white px-4 py-2">
+              <span>Hand In Belonging</span>
+              <span class="arrow-chip">&nearr;</span>
             </a>
           </div>
         </div>
@@ -321,14 +374,6 @@
     </div>
   </section>
 </main>
-
-<!-- Pulse animation for real-time dot -->
-<style>
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-</style>
 
 <%- include('../partials/claim-modal') %>
 <%- include('../partials/footer') %>

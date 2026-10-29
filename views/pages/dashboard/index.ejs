@@ -6,26 +6,29 @@
     <%- include('../../partials/alerts') %>
 
     <!-- Student Profile & Dashboard Banner -->
-    <div class="p-4 bg-card-dark rounded-4 border shadow-sm mb-4">
+    <div class="p-4 rounded-4 mb-4" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card);">
       <div class="row align-items-center g-3">
         <div class="col-md-7">
           <div class="d-flex align-items-center gap-3">
-            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fs-3 fw-bold" style="width: 56px; height: 56px;">
+            <div class="rounded-circle d-flex align-items-center justify-content-center fs-3 fw-bold" style="width: 58px; height: 58px; background: rgba(230,242,107,0.15); color: var(--accent-lime); border: 1px solid rgba(230,242,107,0.3);">
               <%= currentUser.name.charAt(0).toUpperCase() %>
             </div>
             <div>
-              <h1 class="h3 fw-bold mb-0"><%= currentUser.name %></h1>
-              <div class="text-muted small">
+              <h1 class="h3 fw-bold text-white mb-0"><%= currentUser.name %></h1>
+              <div class="text-muted small mt-1">
                 <i class="bi bi-envelope me-1"></i> <%= currentUser.email %> 
-                <span class="badge bg-primary-subtle text-primary ms-2"><%= currentUser.role === 'admin' ? 'Campus Admin' : 'Registered Student' %></span>
+                <span class="badge rounded-pill ms-2" style="background: rgba(25,181,232,0.15); color: var(--accent-cyan); border: 1px solid rgba(25,181,232,0.3);">
+                  <%= currentUser.role === 'admin' ? 'Campus Admin' : 'Registered Student' %>
+                </span>
               </div>
             </div>
           </div>
         </div>
 
         <div class="col-md-5 text-md-end">
-          <a href="/items/report" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
-            <i class="bi bi-plus-circle me-1"></i> Report New Item
+          <a href="/items/report" class="btn-pill-white">
+            <span>Report New Item</span>
+            <span class="arrow-chip">&nearr;</span>
           </a>
         </div>
       </div>
@@ -40,7 +43,7 @@
           </div>
           <div>
             <div class="text-muted small fw-semibold">My Reports</div>
-            <h3 class="fw-bold mb-0"><%= myReports.length %></h3>
+            <h3 class="fw-bold mb-0 text-white"><%= myReports.length %></h3>
           </div>
         </div>
       </div>
@@ -52,7 +55,7 @@
           </div>
           <div>
             <div class="text-muted small fw-semibold">My Claims</div>
-            <h3 class="fw-bold mb-0"><%= myClaims.length %></h3>
+            <h3 class="fw-bold mb-0 text-white"><%= myClaims.length %></h3>
           </div>
         </div>
       </div>
@@ -64,7 +67,7 @@
           </div>
           <div>
             <div class="text-muted small fw-semibold">Reunited Items</div>
-            <h3 class="fw-bold mb-0">
+            <h3 class="fw-bold mb-0" style="color: var(--accent-lime);">
               <%= myReports.filter(r => r.status === 'returned').length + myClaims.filter(c => c.status === 'approved').length %>
             </h3>
           </div>
@@ -73,23 +76,23 @@
     </div>
 
     <!-- Tabs: Reports vs Claims -->
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-      <div class="card-header bg-card-dark border-bottom p-0">
-        <ul class="nav nav-tabs border-0 px-3 pt-2" id="dashboardTab" role="tablist">
+    <div class="rounded-4 overflow-hidden" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card);">
+      <div class="border-bottom p-3" style="border-color: var(--border-subtle) !important; background: #151515;">
+        <ul class="nav gap-2" id="dashboardTab" role="tablist">
           <li class="nav-item" role="presentation">
-            <button class="nav-link active fw-bold py-3 px-4 border-0 border-bottom border-primary border-3" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports-pane" type="button" role="tab" aria-controls="reports-pane" aria-selected="true">
-              <i class="bi bi-folder2-open me-2 text-primary"></i> My Reported Items (<%= myReports.length %>)
+            <button class="btn btn-pill-white btn-sm active" id="reports-tab" data-bs-toggle="tab" data-bs-target="#reports-pane" type="button" role="tab" aria-controls="reports-pane" aria-selected="true">
+              <i class="bi bi-folder2-open me-1"></i> My Reported Items (<%= myReports.length %>)
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link fw-bold py-3 px-4 border-0" id="claims-tab" data-bs-toggle="tab" data-bs-target="#claims-pane" type="button" role="tab" aria-controls="claims-pane" aria-selected="false">
-              <i class="bi bi-patch-check me-2 text-success"></i> My Claims (<%= myClaims.length %>)
+            <button class="btn btn-pill-ghost btn-sm" id="claims-tab" data-bs-toggle="tab" data-bs-target="#claims-pane" type="button" role="tab" aria-controls="claims-pane" aria-selected="false">
+              <i class="bi bi-patch-check me-1"></i> My Claims (<%= myClaims.length %>)
             </button>
           </li>
         </ul>
       </div>
 
-      <div class="card-body p-4">
+      <div class="p-4">
         <div class="tab-content" id="dashboardTabContent">
           <!-- Tab 1: My Reports -->
           <div class="tab-pane fade show active" id="reports-pane" role="tabpanel" aria-labelledby="reports-tab">
@@ -111,31 +114,31 @@
                       <tr>
                         <td>
                           <div class="d-flex align-items-center gap-3">
-                            <% if (report.imageUrl) { %>
-                              <img src="<%= report.imageUrl %>" class="rounded-3" style="width: 48px; height: 48px; object-fit: cover;" alt="">
+                            <% if (report.imageUrl || report.image_url) { %>
+                              <img src="<%= report.imageUrl || report.image_url %>" class="rounded-3" style="width: 48px; height: 48px; object-fit: cover;" alt="">
                             <% } else { %>
-                              <div class="rounded-3 bg-dark-alt d-flex align-items-center justify-content-center text-muted" style="width: 48px; height: 48px;">
+                              <div class="rounded-3 d-flex align-items-center justify-content-center text-muted" style="width: 48px; height: 48px; background: #1a1a1a;">
                                 <i class="bi bi-box"></i>
                               </div>
                             <% } %>
                             <div>
-                              <a href="/items/<%= report._id %>" class="fw-bold text-white text-decoration-none">
+                              <a href="/items/<%= report.id || report._id %>" class="fw-bold text-white text-decoration-none">
                                 <%= report.title %>
                               </a>
-                              <div class="small text-muted"><%= report.category.replace('_', ' ') %></div>
+                              <div class="small text-muted"><%= (report.category || '').replace(/_/g, ' ') %></div>
                             </div>
                           </div>
                         </td>
                         <td>
-                          <span class="badge <%= report.type === 'lost' ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success' %> px-2 py-1">
+                          <span class="badge rounded-pill px-3 py-1" style="background: <%= report.type === 'lost' ? 'var(--lost-bg)' : 'var(--found-bg)' %>; color: <%= report.type === 'lost' ? 'var(--lost-color)' : 'var(--found-color)' %>; border: 1px solid <%= report.type === 'lost' ? 'var(--lost-border)' : 'var(--found-border)' %>;">
                             <%= report.type.toUpperCase() %>
                           </span>
                         </td>
                         <td>
-                          <div class="small"><i class="bi bi-geo-alt text-danger me-1"></i><%= report.location %></div>
+                          <div class="small"><i class="bi bi-geo-alt me-1" style="color: var(--accent-pink);"></i><%= report.location %></div>
                         </td>
                         <td>
-                          <div class="small text-muted"><%= new Date(report.dateLostOrFound).toLocaleDateString() %></div>
+                          <div class="small text-muted"><%= new Date(report.dateLostOrFound || report.date_lost_or_found).toLocaleDateString() %></div>
                         </td>
                         <td>
                           <span class="badge badge-status status-<%= report.status %>">
@@ -143,8 +146,9 @@
                           </span>
                         </td>
                         <td class="text-end">
-                          <a href="/items/<%= report._id %>" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                            View <i class="bi bi-arrow-right"></i>
+                          <a href="/items/<%= report.id || report._id %>" class="btn-pill-ghost btn-sm px-3">
+                            <span>View</span>
+                            <span class="arrow-chip" style="width: 16px; height: 16px; font-size: 0.6rem;">&rarr;</span>
                           </a>
                         </td>
                       </tr>
@@ -157,7 +161,7 @@
                 <i class="bi bi-inbox display-4 text-muted mb-3 d-block"></i>
                 <h5 class="fw-bold text-white">No reports logged yet</h5>
                 <p class="text-muted small">Have you lost or found something on campus?</p>
-                <a href="/items/report" class="btn btn-primary rounded-pill px-4">Submit a Report</a>
+                <a href="/items/report" class="btn-pill-white">Submit a Report</a>
               </div>
             <% } %>
           </div>
@@ -182,10 +186,10 @@
                       <tr>
                         <td>
                           <div class="fw-bold text-white"><%= claim.item ? claim.item.title : 'Item #' + claim.itemId %></div>
-                          <small class="text-muted">Item ID: <%= claim.itemId %></small>
+                          <small class="text-muted">Ref: <%= (claim.itemId || '').toString().substring(0, 8) %></small>
                         </td>
                         <td>
-                          <div class="text-truncate small text-secondary" style="max-width: 260px;" title="<%= claim.proofDescription %>">
+                          <div class="text-truncate small text-muted" style="max-width: 260px;" title="<%= claim.proofDescription %>">
                             <%= claim.proofDescription %>
                           </div>
                         </td>
@@ -194,32 +198,32 @@
                         </td>
                         <td>
                           <% if (claim.status === 'pending') { %>
-                            <span class="badge bg-warning-subtle text-warning border px-2 py-1">
-                              <i class="bi bi-hourglass-split me-1"></i> Under Review
+                            <span class="badge rounded-pill px-3 py-1" style="background: var(--review-bg); color: var(--review-color); border: 1px solid var(--review-border);">
+                              <i class="bi bi-hourglass-split me-1"></i> Review
                             </span>
                           <% } else if (claim.status === 'approved') { %>
-                            <span class="badge bg-success-subtle text-success border px-2 py-1">
+                            <span class="badge rounded-pill px-3 py-1" style="background: var(--found-bg); color: var(--found-color); border: 1px solid var(--found-border);">
                               <i class="bi bi-check-circle-fill me-1"></i> Approved
                             </span>
                           <% } else { %>
-                            <span class="badge bg-danger-subtle text-danger border px-2 py-1">
+                            <span class="badge rounded-pill px-3 py-1" style="background: var(--lost-bg); color: var(--lost-color); border: 1px solid var(--lost-border);">
                               <i class="bi bi-x-circle me-1"></i> Rejected
                             </span>
                           <% } %>
                         </td>
                         <td>
                           <% if (claim.status === 'approved') { %>
-                            <span class="small text-success fw-semibold">
+                            <span class="small fw-semibold" style="color: var(--accent-lime);">
                               <i class="bi bi-building"></i> Collect at Student Center Room 102
                             </span>
                           <% } else if (claim.status === 'pending') { %>
                             <span class="small text-muted">Awaiting security staff verification</span>
                           <% } else { %>
-                            <span class="small text-danger">Proof insufficient. Contact desk.</span>
+                            <span class="small" style="color: var(--lost-color);">Proof insufficient. Contact desk.</span>
                           <% } %>
                         </td>
                         <td class="text-end">
-                          <a href="/items/<%= claim.itemId %>" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                          <a href="/items/<%= claim.itemId %>" class="btn-pill-ghost btn-sm px-3">
                             View Item
                           </a>
                         </td>
@@ -233,7 +237,7 @@
                 <i class="bi bi-shield-x display-4 text-muted mb-3 d-block"></i>
                 <h5 class="fw-bold text-white">No claims filed yet</h5>
                 <p class="text-muted small">Browse found items to claim something that belongs to you.</p>
-                <a href="/items?type=found" class="btn btn-outline-success rounded-pill px-4">Browse Found Items</a>
+                <a href="/items?type=found" class="btn-pill-white">Browse Found Items</a>
               </div>
             <% } %>
           </div>

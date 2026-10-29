@@ -7,41 +7,41 @@
 
     <!-- Page Header -->
     <div class="text-center mb-4">
-      <div class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-bold mb-2">
-        Campus Registry Form
+      <div class="badge rounded-pill px-3 py-2 fw-bold mb-2" style="background: rgba(230,242,107,0.12); color: var(--accent-lime); border: 1px solid rgba(230,242,107,0.3);">
+        Campus Recovery Registry
       </div>
-      <h1 class="h2 fw-bold text-white">Report an Item</h1>
+      <h1 class="h2 fw-bold text-white">Report a Belonging</h1>
       <p class="text-muted">
         Fill out the details below as accurately as possible to facilitate quick recovery or reunion.
       </p>
     </div>
 
     <!-- Live Duplicate Warning Alert (Hidden by default, triggered by JS) -->
-    <div id="duplicateWarningAlert" class="alert alert-warning d-none rounded-3 shadow-sm border-0 d-flex align-items-center gap-3 mb-4" role="alert">
+    <div id="duplicateWarningAlert" class="duplicate-alert-banner d-none" role="alert">
       <i class="bi bi-exclamation-triangle-fill fs-3 text-warning"></i>
       <div>
         <div class="fw-bold">Similar Existing Report Detected!</div>
         <div class="small">
-          We found a similar entry in our database: <strong id="duplicateMatchTitle">Item</strong>.
+          We found a similar entry in our database: <strong id="duplicateMatchTitle" class="text-white">Item</strong>.
           Please check if your item has already been reported before submitting.
         </div>
       </div>
     </div>
 
-    <div class="form-card">
+    <div class="p-4 p-md-5 rounded-4" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card);">
       <form action="/items" method="POST" enctype="multipart/form-data" id="reportItemForm" class="needs-validation" novalidate>
         <!-- Segmented Type Selector -->
         <div class="mb-4 text-center">
-          <label class="form-label d-block text-muted small text-uppercase fw-bold mb-2">What are you reporting?</label>
-          <div class="btn-group w-100" role="group" aria-label="Item Type Selector">
+          <label class="form-label d-block small text-uppercase fw-bold mb-2" style="color: var(--accent-lime); letter-spacing: 0.06em;">What are you reporting?</label>
+          <div class="segmented-pill-group" role="group" aria-label="Item Type Selector">
             <input type="radio" class="btn-check" name="type" id="typeLost" value="lost" <%= (typeof selectedType !== 'undefined' && selectedType === 'found') ? '' : 'checked' %>>
-            <label class="btn btn-outline-danger py-2 fw-bold" for="typeLost">
-              <i class="bi bi-search me-1"></i> I Lost an Item
+            <label class="btn" for="typeLost">
+              <i class="bi bi-search me-1 text-danger"></i> I Lost an Item
             </label>
 
             <input type="radio" class="btn-check" name="type" id="typeFound" value="found" <%= (typeof selectedType !== 'undefined' && selectedType === 'found') ? 'checked' : '' %>>
-            <label class="btn btn-outline-success py-2 fw-bold" for="typeFound">
-              <i class="bi bi-hand-index-thumb me-1"></i> I Found an Item
+            <label class="btn" for="typeFound">
+              <i class="bi bi-plus-circle me-1 text-success"></i> I Found an Item
             </label>
           </div>
         </div>
@@ -49,8 +49,8 @@
         <div class="row g-3">
           <!-- Item Title -->
           <div class="col-12">
-            <label for="reportTitle" class="form-label">
-              Item Title / Name <span class="text-danger">*</span>
+            <label for="reportTitle" class="form-label text-white">
+              Item Title / Name <span style="color: var(--lost-color);">*</span>
             </label>
             <input type="text" class="form-control form-control-lg fs-6" id="reportTitle" name="title" placeholder="e.g., Casio FX-991EX Calculator, Black Dell XPS 15, Leather Wallet" required>
             <div class="invalid-feedback">Please provide a descriptive item title.</div>
@@ -58,8 +58,8 @@
 
           <!-- Category -->
           <div class="col-md-6">
-            <label for="reportCategory" class="form-label">
-              Category <span class="text-danger">*</span>
+            <label for="reportCategory" class="form-label text-white">
+              Category <span style="color: var(--lost-color);">*</span>
             </label>
             <select class="form-select" id="reportCategory" name="category" required>
               <option value="" disabled selected>Select category...</option>
@@ -78,8 +78,8 @@
 
           <!-- Campus Location -->
           <div class="col-md-6">
-            <label for="reportLocation" class="form-label">
-              Campus Location <span class="text-danger">*</span>
+            <label for="reportLocation" class="form-label text-white">
+              Campus Location <span style="color: var(--lost-color);">*</span>
             </label>
             <select class="form-select" id="reportLocation" name="location" required>
               <option value="" disabled selected>Select campus area...</option>
@@ -88,53 +88,43 @@
               <option value="Engineering Quad">Engineering Complex (Quad A & B)</option>
               <option value="Central Cafeteria">Central Cafeteria & Food Court</option>
               <option value="Student Center">Student Activity Center / Union</option>
-              <option value="Sports Complex">Gym, Pool & Sports Complex</option>
-              <option value="Dormitory Hall A">Dormitory Hall A / Residential Commons</option>
-              <option value="Administration Building">Administration & Registrar Building</option>
-              <option value="Campus Shuttle Stop">Campus Shuttle Stop / Transit Terminal</option>
+              <option value="Sports Complex">Sports Complex & Gymnasium</option>
+              <option value="Dormitory Hall A">Dormitory / Student Residences</option>
+              <option value="Other">Other / Unknown Campus Zone</option>
             </select>
-            <div class="invalid-feedback">Please select the approximate campus location.</div>
-          </div>
-
-          <!-- Specific Spot Details -->
-          <div class="col-md-6">
-            <label for="reportSpot" class="form-label">Specific Room / Spot (Optional)</label>
-            <input type="text" class="form-control" id="reportSpot" name="spotDetails" placeholder="e.g. 2nd floor silent study table 14, table near vending machine">
+            <div class="invalid-feedback">Please specify the location.</div>
           </div>
 
           <!-- Date Lost or Found -->
           <div class="col-md-6">
-            <label for="reportDate" class="form-label">
-              Date Lost / Found <span class="text-danger">*</span>
+            <label for="reportDate" class="form-label text-white">
+              Date Lost or Found <span style="color: var(--lost-color);">*</span>
             </label>
-            <input type="date" class="form-control" id="reportDate" name="dateLostOrFound" required value="<%= new Date().toISOString().split('T')[0] %>">
-            <div class="invalid-feedback">Please select the date.</div>
+            <input type="date" class="form-control" id="reportDate" name="dateLostOrFound" required max="<%= new Date().toISOString().split('T')[0] %>">
+            <div class="invalid-feedback">Please select a valid date.</div>
           </div>
 
           <!-- Description -->
           <div class="col-12">
-            <label for="reportDescription" class="form-label">
-              Detailed Description <span class="text-danger">*</span>
+            <label for="reportDescription" class="form-label text-white">
+              Detailed Description <span style="color: var(--lost-color);">*</span>
             </label>
-            <textarea class="form-control" id="reportDescription" name="description" rows="4" placeholder="Describe the item's color, brand, condition, visible stickers, case type, or unique marks..." required></textarea>
-            <div class="form-text small">
-              <i class="bi bi-shield-check text-success"></i> <strong>Pro Tip:</strong> For security reasons, keep at least one secret detail (such as lock screen wallpaper or inner compartment contents) unmentioned so the owner can prove it during claiming.
-            </div>
+            <textarea class="form-control" id="reportDescription" name="description" rows="4" placeholder="Mention color, brand, recognizable stickers, unique engravings, contents, or circumstances..." required minlength="15"></textarea>
+            <div class="small text-muted mt-1">Detailed descriptions increase match accuracy by over 80%.</div>
           </div>
 
           <!-- Image Upload Dropzone -->
           <div class="col-12">
-            <label class="form-label">Item Photo (Optional but Recommended)</label>
-            <input type="file" id="itemImageInput" name="itemImage" class="d-none" accept="image/png, image/jpeg, image/jpg, image/webp">
-            
+            <label class="form-label text-white">Item Photograph (Optional)</label>
             <div class="upload-dropzone" id="uploadDropzone">
-              <i class="bi bi-cloud-arrow-up display-5 text-primary mb-2"></i>
-              <div class="fw-bold text-white">Click to select photo or drag and drop here</div>
-              <small class="text-muted">PNG, JPG, WEBP up to 5MB</small>
-
-              <!-- Live Preview -->
+              <input type="file" id="itemImageInput" name="image" accept="image/png, image/jpeg, image/jpg, image/webp" class="d-none">
+              <div class="upload-dropzone-content">
+                <i class="bi bi-cloud-arrow-up display-5 text-muted mb-2 d-block"></i>
+                <div class="fw-bold text-white">Click to select photo or drag and drop here</div>
+                <div class="small text-muted mt-1">Supports PNG, JPG, WEBP (Max 5MB)</div>
+              </div>
               <div class="upload-preview-container" id="uploadPreviewContainer">
-                <img id="uploadPreviewImg" src="" alt="Preview" class="upload-preview-img">
+                <img src="" alt="Item Preview" id="uploadPreviewImg" class="upload-preview-img">
                 <button type="button" class="upload-remove-btn" id="uploadRemoveBtn" title="Remove image">
                   <i class="bi bi-x"></i>
                 </button>
@@ -143,10 +133,11 @@
           </div>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-          <a href="/items" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
-          <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm">
-            <i class="bi bi-check2-circle me-1"></i> Submit Report
+        <div class="d-flex justify-content-between align-items-center mt-4 pt-3" style="border-top: 1px solid var(--border-subtle);">
+          <a href="/items" class="btn-pill-ghost">Cancel</a>
+          <button type="submit" class="btn-pill-white px-4 py-2">
+            <span>Submit Report</span>
+            <span class="arrow-chip">&nearr;</span>
           </button>
         </div>
       </form>

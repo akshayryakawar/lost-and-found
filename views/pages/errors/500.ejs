@@ -1,28 +1,32 @@
 <%- include('../../partials/head', { title: '500 - Server Error | Campus Lost & Found' }) %>
 <%- include('../../partials/navbar', { activePage: '' }) %>
 
-<main class="py-5">
-  <div class="container text-center py-5" style="max-width: 600px;">
+<main class="py-5 position-relative">
+  <!-- Subtle ambient glow -->
+  <div class="ambient-glow-wrapper">
+    <div class="ambient-glow-center" style="width: 500px; height: 500px;"></div>
+  </div>
+
+  <div class="container text-center py-5 position-relative" style="max-width: 620px; z-index: 5;">
     <div class="mb-4">
-      <div class="rounded-circle bg-warning-subtle text-warning d-inline-flex align-items-center justify-content-center" style="width: 88px; height: 88px; font-size: 2.75rem;">
-        <i class="bi bi-exclamation-triangle"></i>
-      </div>
+      <span class="asterisk-mark" style="font-size: 3.5rem; color: var(--lost-color);">&#10033;</span>
     </div>
 
-    <h1 class="display-5 fw-bold text-white mb-2">Unexpected Glitch</h1>
-    <h2 class="h5 text-muted mb-4">500 - Internal Server Error</h2>
+    <h1 class="display-4 fw-bold text-white mb-2" style="letter-spacing: -0.04em;">System Glitch</h1>
+    <h2 class="h5 text-muted mb-4">500 &mdash; An unexpected server error occurred while processing your request.</h2>
 
-    <p class="text-secondary mb-4">
-      Our campus server encountered an issue processing your request. Please try again in a few moments, or reach out to the campus helpdesk.
+    <p class="text-muted mb-4" style="line-height: 1.7;">
+      Our systems team has been notified. Please try returning to the home directory or report the issue to campus security dispatch.
     </p>
 
     <div class="d-flex justify-content-center gap-3">
-      <a href="/" class="btn btn-primary rounded-pill px-4 fw-semibold">
-        <i class="bi bi-house-door me-1"></i> Return Home
+      <a href="/" class="btn-pill-white">
+        <span>Return to Homepage</span>
+        <span class="arrow-chip">&rarr;</span>
       </a>
-      <button onclick="window.location.reload()" class="btn btn-outline-secondary rounded-pill px-4">
-        <i class="bi bi-arrow-clockwise me-1"></i> Try Again
-      </button>
+      <a href="/items" class="btn-pill-ghost">
+        <span>Browse Catalog</span>
+      </a>
     </div>
   </div>
 </main>

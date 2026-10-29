@@ -10,18 +10,18 @@
       <div>
         <nav aria-label="breadcrumb">
           <ol class="breadcrumb mb-1 small">
-            <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Browse Items</li>
+            <li class="breadcrumb-item"><a href="/" class="text-muted text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item active text-white" aria-current="page">Browse Catalog</li>
           </ol>
         </nav>
-        <h1 class="h3 fw-bold mb-0">Campus Lost &amp; Found Directory</h1>
+        <h1 class="h3 fw-bold text-white mb-0">Campus Belongings Directory</h1>
       </div>
 
       <div class="d-flex gap-2">
-        <a href="/items/report?type=lost" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+        <a href="/items/report?type=lost" class="btn btn-sm rounded-pill px-3" style="background: rgba(255,90,112,0.15); color: #ff5a70; border: 1px solid rgba(255,90,112,0.3); font-weight: 600;">
           <i class="bi bi-search me-1"></i> Report Lost
         </a>
-        <a href="/items/report?type=found" class="btn btn-outline-success btn-sm rounded-pill px-3">
+        <a href="/items/report?type=found" class="btn btn-sm rounded-pill px-3" style="background: rgba(94,228,117,0.15); color: #5ee475; border: 1px solid rgba(94,228,117,0.3); font-weight: 600;">
           <i class="bi bi-plus-circle me-1"></i> Report Found
         </a>
       </div>
@@ -36,7 +36,7 @@
             <label class="form-label small text-muted">Keyword Search</label>
             <div class="input-group">
               <span class="input-group-text border-end-0 text-muted"><i class="bi bi-search"></i></span>
-              <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="e.g. Laptop, ID card, jacket..." value="<%= currentFilters.search || '' %>">
+              <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="e.g. AirPods, Hydro Flask, Student ID..." value="<%= currentFilters.search || '' %>">
             </div>
           </div>
 
@@ -69,9 +69,9 @@
 
           <!-- Campus Location Filter -->
           <div class="col-lg-2 col-md-4">
-            <label class="form-label small text-muted">Location</label>
+            <label class="form-label small text-muted">Campus Area</label>
             <select name="location" class="form-select" onchange="this.form.submit()">
-              <option value="">All Campus Locations</option>
+              <option value="">All Campus Areas</option>
               <option value="Main Library" <%= currentFilters.location === 'Main Library' ? 'selected' : '' %>>Main Library</option>
               <option value="Science Block" <%= currentFilters.location === 'Science Block' ? 'selected' : '' %>>Science Block</option>
               <option value="Engineering Quad" <%= currentFilters.location === 'Engineering Quad' ? 'selected' : '' %>>Engineering Quad</option>
@@ -95,21 +95,22 @@
           </div>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top flex-wrap gap-2">
+        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 flex-wrap gap-2" style="border-top: 1px solid var(--border-subtle);">
           <div class="d-flex align-items-center gap-2 small text-muted">
-            <span>Showing <strong><%= items.length %></strong> of <strong><%= pagination.totalItems %></strong> items</span>
+            <span>Showing <strong class="text-white"><%= items.length %></strong> of <strong class="text-white"><%= pagination.totalItems %></strong> items</span>
             <% if (currentFilters.search || currentFilters.type || currentFilters.category || currentFilters.location || currentFilters.status) { %>
-              <a href="/items" class="badge bg-secondary-subtle text-secondary text-decoration-none">
+              <a href="/items" class="badge rounded-pill px-3 py-1 text-decoration-none" style="background: rgba(255,255,255,0.08); color: var(--text-muted); border: 1px solid var(--border-subtle);">
                 <i class="bi bi-x-circle me-1"></i> Clear Filters
               </a>
             <% } %>
           </div>
 
           <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary btn-sm px-4 rounded-pill">
-              <i class="bi bi-funnel me-1"></i> Apply Filters
+            <button type="submit" class="btn-pill-white btn-sm px-4">
+              <span>Filter Catalog</span>
+              <span class="arrow-chip" style="width: 18px; height: 18px; font-size: 0.65rem;">&rarr;</span>
             </button>
-            <a href="/items" class="btn btn-outline-secondary btn-sm px-3 rounded-pill">Reset</a>
+            <a href="/items" class="btn-pill-ghost btn-sm px-3">Reset</a>
           </div>
         </div>
       </form>
@@ -123,17 +124,15 @@
         <% }); %>
       <% } else { %>
         <div class="col-12">
-          <div class="empty-state-box">
-            <div class="empty-state-icon">
-              <i class="bi bi-search"></i>
-            </div>
-            <h4 class="fw-bold">No items found</h4>
-            <p class="text-muted max-w-500 mx-auto">
+          <div class="text-center py-5 p-4 rounded-4" style="background: var(--bg-surface); border: 1px dashed var(--border-medium);">
+            <i class="bi bi-search display-4 text-muted mb-3 d-block"></i>
+            <h4 class="fw-bold text-white">No items found</h4>
+            <p class="text-muted mx-auto" style="max-width: 500px;">
               We couldn't find any reports matching your search and filter criteria. Try clearing some filters or searching with different keywords.
             </p>
             <div class="d-flex justify-content-center gap-2 mt-3">
-              <a href="/items" class="btn btn-outline-secondary rounded-pill px-4">Clear All Filters</a>
-              <a href="/items/report" class="btn btn-primary rounded-pill px-4">Submit a New Report</a>
+              <a href="/items" class="btn-pill-ghost">Clear All Filters</a>
+              <a href="/items/report" class="btn-pill-white">Submit a Report</a>
             </div>
           </div>
         </div>
@@ -143,19 +142,19 @@
     <!-- Pagination Controls -->
     <% if (pagination.totalPages > 1) { %>
       <nav aria-label="Page navigation" class="mt-4">
-        <ul class="pagination justify-content-center">
+        <ul class="pagination justify-content-center gap-1">
           <li class="page-item <%= pagination.currentPage <= 1 ? 'disabled' : '' %>">
-            <a class="page-link rounded-pill me-2 px-3" href="/items?page=<%= pagination.currentPage - 1 %>">Previous</a>
+            <a class="btn-pill-ghost btn-sm rounded-pill me-2 px-3 text-decoration-none" href="/items?page=<%= pagination.currentPage - 1 %>">Previous</a>
           </li>
 
           <% for (let p = 1; p <= pagination.totalPages; p++) { %>
             <li class="page-item <%= pagination.currentPage === p ? 'active' : '' %>">
-              <a class="page-link rounded-pill mx-1 px-3" href="/items?page=<%= p %>"><%= p %></a>
+              <a class="btn-pill-ghost btn-sm rounded-pill mx-1 px-3 text-decoration-none <%= pagination.currentPage === p ? 'border-light' : '' %>" style="<%= pagination.currentPage === p ? 'background: #ffffff; color: #000000 !important; font-weight: 700;' : '' %>" href="/items?page=<%= p %>"><%= p %></a>
             </li>
           <% } %>
 
           <li class="page-item <%= pagination.currentPage >= pagination.totalPages ? 'disabled' : '' %>">
-            <a class="page-link rounded-pill ms-2 px-3" href="/items?page=<%= pagination.currentPage + 1 %>">Next</a>
+            <a class="btn-pill-ghost btn-sm rounded-pill ms-2 px-3 text-decoration-none" href="/items?page=<%= pagination.currentPage + 1 %>">Next</a>
           </li>
         </ul>
       </nav>

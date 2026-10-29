@@ -1,54 +1,56 @@
 <!-- Claim Item Modal -->
 <div class="modal fade" id="claimItemModal" tabindex="-1" aria-labelledby="claimItemModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg rounded-4">
-      <div class="modal-header bg-dark-alt border-bottom px-4 py-3">
-        <div class="d-flex align-items-center gap-2">
-          <div class="rounded-circle bg-primary-subtle text-primary p-2 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+    <div class="modal-content border-0 shadow-lg" style="background: #141414; border: 1px solid rgba(255,255,255,0.12) !important; border-radius: 28px;">
+      
+      <div class="modal-header border-bottom px-4 py-3" style="border-color: rgba(255,255,255,0.08) !important;">
+        <div class="d-flex align-items-center gap-3">
+          <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: rgba(230,242,107,0.12); color: var(--accent-lime); border: 1px solid rgba(230,242,107,0.3);">
             <i class="bi bi-shield-check fs-5"></i>
           </div>
           <div>
-            <h5 class="modal-title fw-bold text-white mb-0" id="claimItemModalLabel">Submit Ownership Claim</h5>
-            <small class="text-muted">Item: <span id="claimItemTitleDisplay" class="fw-semibold text-primary">Item</span></small>
+            <h5 class="modal-title fw-bold text-white mb-0" id="claimItemModalLabel" style="font-size: 1.15rem;">Submit Ownership Claim</h5>
+            <small class="text-muted" style="font-size: 0.8rem;">Item: <span id="claimItemTitleDisplay" class="fw-semibold text-white">Item</span></small>
           </div>
         </div>
-        <button type="button" class="btn-close shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
       <form action="/claims" method="POST" id="claimForm">
         <input type="hidden" name="itemId" id="claimItemId" value="">
         
         <div class="modal-body p-4">
-          <div class="alert alert-info py-2 px-3 small rounded-3 mb-3 d-flex align-items-center gap-2">
+          <div class="p-3 rounded-3 mb-4 d-flex align-items-center gap-3" style="background: rgba(25, 181, 232, 0.1); border: 1px solid rgba(25, 181, 232, 0.25); color: #19b5e8; font-size: 0.85rem;">
             <i class="bi bi-info-circle-fill fs-5"></i>
-            <div>To prevent fraudulent claims, campus staff will review your proof before dispatch.</div>
+            <div>To prevent fraudulent claims, campus security will review your proof before dispatch.</div>
           </div>
 
           <div class="mb-3">
-            <label for="claimProofDescription" class="form-label">
-              Proof of Ownership <span class="text-danger">*</span>
+            <label for="claimProofDescription" class="form-label text-white">
+              Proof of Ownership <span style="color: var(--lost-color);">*</span>
             </label>
-            <textarea class="form-control" id="claimProofDescription" name="proofDescription" rows="3" placeholder="Provide distinct features not visible in photos (e.g., lock screen photo, serial digits, internal contents, scratches)..." required></textarea>
-            <div class="form-text small">Detailed proof helps campus security verify your claim swiftly.</div>
+            <textarea class="form-control" id="claimProofDescription" name="proofDescription" rows="3" placeholder="Provide distinct features not visible in public photos (e.g., lock screen wallpaper, serial digits, internal contents, unique scratch)..." required></textarea>
+            <div class="small text-muted mt-1" style="font-size: 0.76rem;">Detailed proof helps campus security verify your claim swiftly.</div>
           </div>
 
           <div class="mb-3">
-            <label for="claimMessage" class="form-label">Message / Additional Details (Optional)</label>
-            <textarea class="form-control" id="claimMessage" name="message" rows="2" placeholder="When and where you believe you lost it, or best times you can visit security desk..."></textarea>
+            <label for="claimMessage" class="form-label text-white">Message / Additional Details (Optional)</label>
+            <textarea class="form-control" id="claimMessage" name="message" rows="2" placeholder="When and where you lost it, or best times you can visit security dispatch..."></textarea>
           </div>
 
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="claimAgreement" required>
+          <div class="form-check mt-3">
+            <input class="form-check-input" type="checkbox" id="claimAgreement" required style="background-color: #1a1a1a; border-color: rgba(255,255,255,0.2);">
             <label class="form-check-label small text-muted" for="claimAgreement">
               I certify under campus honor code that this item is my rightful property.
             </label>
           </div>
         </div>
 
-        <div class="modal-footer bg-dark-alt border-top px-4 py-3">
-          <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold">
-            <i class="bi bi-send-check me-1"></i> Submit Claim
+        <div class="modal-footer border-top px-4 py-3" style="border-color: rgba(255,255,255,0.08) !important;">
+          <button type="button" class="btn-pill-ghost btn-sm px-4" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn-pill-white btn-sm px-4">
+            <span>Submit Claim</span>
+            <span class="arrow-chip">&nearr;</span>
           </button>
         </div>
       </form>

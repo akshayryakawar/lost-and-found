@@ -8,9 +8,9 @@
     <!-- Breadcrumb Navigation -->
     <nav aria-label="breadcrumb" class="mb-4">
       <ol class="breadcrumb small">
-        <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
-        <li class="breadcrumb-item"><a href="/items" class="text-decoration-none">Items Directory</a></li>
-        <li class="breadcrumb-item active text-truncate" aria-current="page" style="max-width: 300px;"><%= item.title %></li>
+        <li class="breadcrumb-item"><a href="/" class="text-muted text-decoration-none">Home</a></li>
+        <li class="breadcrumb-item"><a href="/items" class="text-muted text-decoration-none">Items Directory</a></li>
+        <li class="breadcrumb-item active text-white text-truncate" aria-current="page" style="max-width: 300px;"><%= item.title %></li>
       </ol>
     </nav>
 
@@ -21,9 +21,9 @@
         <div class="flex-grow-1">
           <div class="fw-bold">Potential <%= item.type === 'lost' ? 'Found' : 'Lost' %> Match Detected!</div>
           <p class="mb-2 small">
-            A similar item entitled <strong>"<%= potentialMatch.title %>"</strong> was reported at <strong><%= potentialMatch.location %></strong> on <%= new Date(potentialMatch.dateLostOrFound).toLocaleDateString() %>.
+            A similar item entitled <strong>"<%= potentialMatch.title %>"</strong> was reported at <strong><%= potentialMatch.location %></strong> on <%= new Date(potentialMatch.dateLostOrFound || potentialMatch.date_lost_or_found).toLocaleDateString() %>.
           </p>
-          <a href="/items/<%= potentialMatch._id %>" class="btn btn-warning btn-sm fw-bold rounded-pill px-3">
+          <a href="/items/<%= potentialMatch.id || potentialMatch._id %>" class="btn btn-sm fw-bold rounded-pill px-3" style="background: var(--accent-amber); color: #000;">
             <i class="bi bi-eye me-1"></i> Review Matched Item
           </a>
         </div>
@@ -34,26 +34,26 @@
       <!-- Left Column: Item Image & Security Protocol -->
       <div class="col-lg-5">
         <div class="item-detail-gallery mb-4">
-          <% if (item.imageUrl) { %>
-            <img src="<%= item.imageUrl %>" alt="<%= item.title %>" class="img-fluid rounded-3" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center p-5\'><i class=\'bi bi-box-seam display-1 text-muted\'></i><p class=\'text-muted mt-2\'>No photo provided</p></div>';">
+          <% if (item.imageUrl || item.image_url) { %>
+            <img src="<%= item.imageUrl || item.image_url %>" alt="<%= item.title %>" class="img-fluid rounded-4" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center p-5\'><i class=\'bi bi-box-seam display-1 text-muted\'></i><p class=\'text-muted mt-2\'>No photo provided</p></div>';">
           <% } else { %>
             <div class="text-center p-5">
-              <i class="bi <%= item.type === 'lost' ? 'bi-search' : 'bi-box-seam' %> display-1 text-secondary"></i>
-              <p class="text-muted mt-2 mb-0">No item image uploaded</p>
+              <i class="bi <%= item.type === 'lost' ? 'bi-search' : 'bi-box-seam' %> display-1 text-muted"></i>
+              <p class="text-muted mt-2 mb-0">No item photo uploaded</p>
             </div>
           <% } %>
         </div>
 
         <!-- Safe Recovery Card -->
-        <div class="p-3 bg-card-dark rounded-4 border shadow-sm">
+        <div class="p-4 rounded-4" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card);">
           <h6 class="fw-bold text-white d-flex align-items-center gap-2 mb-2">
-            <i class="bi bi-shield-check text-success"></i> Campus Handover Protocol
+            <i class="bi bi-shield-check" style="color: var(--accent-lime);"></i> Campus Handover Protocol
           </h6>
           <p class="small text-muted mb-2">
-            Items registered through the portal must be surrendered to or claimed from the <strong>Student Center Security Desk</strong>.
+            Items registered through the portal must be surrendered to or claimed from the <strong class="text-white">Student Center Security Desk</strong>.
           </p>
-          <div class="small bg-dark-alt p-2 rounded-3 text-secondary">
-            <i class="bi bi-info-circle me-1 text-primary"></i> Be prepared to show your Student ID and demonstrate proof of ownership.
+          <div class="small p-3 rounded-3 text-muted" style="background: #181818; border: 1px solid var(--border-subtle);">
+            <i class="bi bi-info-circle me-1" style="color: var(--accent-cyan);"></i> Be prepared to show your Student ID and demonstrate proof of ownership.
           </div>
         </div>
       </div>
@@ -83,7 +83,7 @@
 
           <!-- Header Tags & Title -->
           <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-            <span class="badge <%= item.type === 'lost' ? 'bg-danger text-white' : 'bg-success text-white' %> px-3 py-2 rounded-pill fw-bold text-uppercase">
+            <span class="badge px-3 py-2 rounded-pill fw-bold text-uppercase" style="background: <%= item.type === 'lost' ? 'var(--lost-bg)' : 'var(--found-bg)' %>; color: <%= item.type === 'lost' ? 'var(--lost-color)' : 'var(--found-color)' %>; border: 1px solid <%= item.type === 'lost' ? 'var(--lost-border)' : 'var(--found-border)' %>;">
               <i class="bi <%= item.type === 'lost' ? 'bi-exclamation-circle' : 'bi-check-circle' %> me-1"></i>
               <%= item.type === 'lost' ? 'Lost Item' : 'Found Item' %>
             </span>
@@ -92,64 +92,73 @@
               Status: <%= item.status.replace('_', ' ').toUpperCase() %>
             </span>
 
-            <span class="badge bg-dark-alt text-muted border px-3 py-2 rounded-pill ms-auto">
-              Ref ID: <%= item._id %>
+            <span class="badge px-3 py-2 rounded-pill ms-auto" style="background: #181818; color: var(--text-muted); border: 1px solid var(--border-subtle); font-size: 0.75rem;">
+              Ref: <%= (item.id || item._id).toString().substring(0, 8) %>
             </span>
           </div>
 
           <h2 class="h2 fw-bold text-white mb-3"><%= item.title %></h2>
 
           <div class="mb-4">
-            <h6 class="fw-bold text-muted small text-uppercase">Item Description</h6>
-            <p class="text-secondary" style="white-space: pre-line; line-height: 1.7;"><%= item.description %></p>
+            <h6 class="text-uppercase small fw-bold text-muted mb-2" style="letter-spacing: 0.05em;">Description</h6>
+            <p class="text-white" style="line-height: 1.7; font-size: 0.95rem;">
+              <%= item.description %>
+            </p>
           </div>
 
           <!-- Specifications Table -->
-          <table class="table meta-spec-table mb-4">
-            <tbody>
-              <tr>
-                <th>Category</th>
-                <td><i class="bi bi-tag text-primary me-2"></i><%= item.category.replace('_', ' ') %></td>
-              </tr>
-              <tr>
-                <th>Campus Location</th>
-                <td><i class="bi bi-geo-alt-fill text-danger me-2"></i><%= item.location %></td>
-              </tr>
-              <tr>
-                <th>Date <%= item.type === 'lost' ? 'Lost' : 'Found' %></th>
-                <td><i class="bi bi-calendar-event text-primary me-2"></i><%= new Date(item.dateLostOrFound).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></td>
-              </tr>
-              <tr>
-                <th>Date Logged</th>
-                <td><i class="bi bi-clock-history text-muted me-2"></i><%= new Date(item.createdAt).toLocaleDateString() %></td>
-              </tr>
-              <tr>
-                <th>Reported By</th>
-                <td>
-                  <i class="bi bi-person-circle text-secondary me-2"></i>
-                  <%= item.reportedBy ? item.reportedBy.name : 'Campus Community Member' %>
-                  <% if (item.reportedBy && item.reportedBy.role === 'admin') { %>
-                    <span class="badge bg-danger-subtle text-danger ms-1">Security Staff</span>
-                  <% } %>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="table-responsive mb-4">
+            <table class="table meta-spec-table mb-0">
+              <tbody>
+                <tr>
+                  <th>Category</th>
+                  <td>
+                    <span class="badge rounded-pill px-3 py-1" style="background: rgba(230,242,107,0.12); color: var(--accent-lime); border: 1px solid rgba(230,242,107,0.3);">
+                      <%= (item.category || '').replace(/_/g, ' ') %>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>Location</th>
+                  <td><i class="bi bi-geo-alt-fill me-1" style="color: var(--accent-pink);"></i> <%= item.location %></td>
+                </tr>
+                <tr>
+                  <th>Date Lost/Found</th>
+                  <td><i class="bi bi-calendar3 me-1" style="color: var(--accent-cyan);"></i> <%= new Date(item.dateLostOrFound || item.date_lost_or_found).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) %></td>
+                </tr>
+                <% if (item.reportedBy && item.reportedBy.name) { %>
+                  <tr>
+                    <th>Reported By</th>
+                    <td><%= item.reportedBy.name %> (<%= item.reportedBy.role === 'admin' ? 'Campus Admin' : 'Student' %>)</td>
+                  </tr>
+                <% } %>
+                <tr>
+                  <th>Custody Status</th>
+                  <td>
+                    <% if (item.status === 'returned') { %>
+                      <span class="text-muted"><i class="bi bi-check-all me-1"></i> Safely Reunited with Owner</span>
+                    <% } else if (item.type === 'found') { %>
+                      <span style="color: var(--accent-lime);"><i class="bi bi-shield-check me-1"></i> In Campus Security Custody</span>
+                    <% } else { %>
+                      <span style="color: var(--lost-color);"><i class="bi bi-search me-1"></i> Awaiting Location Match</span>
+                    <% } %>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
 
-          <!-- Action Buttons -->
-          <div class="d-flex flex-wrap gap-3 pt-3 border-top">
+          <!-- Bottom Action Buttons -->
+          <div class="d-flex flex-wrap align-items-center gap-3 pt-3 border-top" style="border-color: var(--border-subtle) !important;">
             <% if (item.type === 'found' && (item.status === 'open' || item.status === 'under_review')) { %>
-              <button type="button" class="btn btn-primary btn-lg rounded-pill px-4 shadow-sm fw-bold" data-bs-toggle="modal" data-bs-target="#claimItemModal" data-item-id="<%= item._id %>" data-item-title="<%= item.title %>">
-                <i class="bi bi-shield-check me-2"></i> This Is Mine (Submit Claim)
+              <button type="button" class="btn-pill-white px-4 py-2" data-bs-toggle="modal" data-bs-target="#claimItemModal" data-item-id="<%= item.id || item._id %>" data-item-title="<%= item.title %>">
+                <span>Submit Ownership Claim</span>
+                <span class="arrow-chip">&nearr;</span>
               </button>
-            <% } else if (item.type === 'lost' && item.status === 'open') { %>
-              <a href="/items/report?type=found&matchedTitle=<%= encodeURIComponent(item.title) %>" class="btn btn-success btn-lg rounded-pill px-4 shadow-sm fw-bold">
-                <i class="bi bi-hand-index-thumb me-2"></i> I Found This Item
-              </a>
             <% } %>
 
-            <a href="/items" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
-              <i class="bi bi-arrow-left me-1"></i> Back to Catalog
+            <a href="/items" class="btn-pill-ghost px-4 py-2">
+              <i class="bi bi-arrow-left me-1"></i> Back to Directory
             </a>
           </div>
         </div>

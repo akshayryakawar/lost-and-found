@@ -1,23 +1,23 @@
 <% if (typeof success_msg !== 'undefined' && success_msg && success_msg.length > 0) { %>
-  <div class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 mb-4 rounded-3 shadow-sm border-0" role="alert">
-    <i class="bi bi-check-circle-fill fs-5 text-success"></i>
-    <div><%= success_msg %></div>
+  <div class="alert alert-dismissible fade show d-flex align-items-center gap-3 mb-4 rounded-4" role="alert" style="background: rgba(94, 228, 117, 0.12); border: 1px solid rgba(94, 228, 117, 0.35); color: #5ee475; backdrop-filter: blur(10px);">
+    <i class="bi bi-check-circle-fill fs-5"></i>
+    <div class="fw-medium"><%= success_msg %></div>
     <button type="button" class="btn-close ms-auto shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
 <% } %>
 
 <% if (typeof error_msg !== 'undefined' && error_msg && error_msg.length > 0) { %>
-  <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center gap-2 mb-4 rounded-3 shadow-sm border-0" role="alert">
-    <i class="bi bi-exclamation-triangle-fill fs-5 text-danger"></i>
-    <div><%= error_msg %></div>
+  <div class="alert alert-dismissible fade show d-flex align-items-center gap-3 mb-4 rounded-4" role="alert" style="background: rgba(255, 90, 112, 0.12); border: 1px solid rgba(255, 90, 112, 0.35); color: #ff5a70; backdrop-filter: blur(10px);">
+    <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+    <div class="fw-medium"><%= error_msg %></div>
     <button type="button" class="btn-close ms-auto shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
 <% } %>
 
 <% if (typeof info_msg !== 'undefined' && info_msg && info_msg.length > 0) { %>
-  <div class="alert alert-primary alert-dismissible fade show d-flex align-items-center gap-2 mb-4 rounded-3 shadow-sm border-0" role="alert">
-    <i class="bi bi-info-circle-fill fs-5 text-primary"></i>
-    <div><%= info_msg %></div>
+  <div class="alert alert-dismissible fade show d-flex align-items-center gap-3 mb-4 rounded-4" role="alert" style="background: rgba(25, 181, 232, 0.12); border: 1px solid rgba(25, 181, 232, 0.35); color: #19b5e8; backdrop-filter: blur(10px);">
+    <i class="bi bi-info-circle-fill fs-5"></i>
+    <div class="fw-medium"><%= info_msg %></div>
     <button type="button" class="btn-close ms-auto shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
   </div>
 <% } %>

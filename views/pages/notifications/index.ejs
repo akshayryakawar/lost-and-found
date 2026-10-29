@@ -12,34 +12,34 @@
       </div>
       <% if (notifications && notifications.length > 0) { %>
         <form action="/notifications/mark-read" method="POST">
-          <button type="submit" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+          <button type="submit" class="btn-pill-ghost btn-sm px-3">
             <i class="bi bi-check2-all me-1"></i> Mark All as Read
           </button>
         </form>
       <% } %>
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="rounded-4 overflow-hidden" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card);">
       <div class="list-group list-group-flush">
         <% if (notifications && notifications.length > 0) { %>
           <% notifications.forEach(notif => { %>
-            <div class="list-group-item p-3 d-flex align-items-start gap-3 <%= notif.isRead ? 'bg-card-dark' : 'bg-primary-subtle bg-opacity-25' %> border-bottom">
-              <div class="rounded-circle p-2 mt-1 d-flex align-items-center justify-content-center <%= notif.isRead ? 'bg-dark-alt text-secondary' : 'bg-primary text-white' %>" style="width: 36px; height: 36px;">
+            <div class="list-group-item p-3 d-flex align-items-start gap-3 border-bottom" style="background: <%= notif.isRead ? 'transparent' : 'rgba(230,242,107,0.04)' %>; border-color: var(--border-subtle) !important;">
+              <div class="rounded-circle p-2 mt-1 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: <%= notif.isRead ? '#1a1a1a' : 'rgba(230,242,107,0.15)' %>; color: <%= notif.isRead ? 'var(--text-muted)' : 'var(--accent-lime)' %>; border: 1px solid var(--border-subtle);">
                 <i class="bi <%= notif.type === 'claim_status' ? 'bi-patch-check' : (notif.type === 'item_status' ? 'bi-box-seam' : 'bi-bell') %>"></i>
               </div>
 
               <div class="flex-grow-1">
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                  <span class="badge <%= notif.isRead ? 'bg-secondary-subtle text-secondary' : 'bg-primary text-white' %> rounded-pill small">
+                  <span class="badge rounded-pill small" style="background: rgba(255,255,255,0.08); color: var(--text-muted); font-size: 0.7rem;">
                     <%= notif.type.replace('_', ' ').toUpperCase() %>
                   </span>
                   <small class="text-muted"><%= new Date(notif.createdAt).toLocaleDateString() %></small>
                 </div>
-                <p class="mb-1 text-white fw-medium fs-6"><%= notif.message %></p>
+                <p class="mb-1 text-white fw-medium" style="font-size: 0.92rem;"><%= notif.message %></p>
               </div>
 
               <% if (!notif.isRead) { %>
-                <span class="p-1 bg-primary border border-light rounded-circle align-self-center" title="Unread"></span>
+                <span class="rounded-circle align-self-center" style="width: 8px; height: 8px; background: var(--accent-lime);" title="Unread"></span>
               <% } %>
             </div>
           <% }); %>

@@ -21,8 +21,8 @@
 
   /* Typography Colors */
   --text-main: #ffffff;
-  --text-muted: #9a9a9a;
-  --text-subtle: #666666;
+  --text-muted: #b8b8b8;
+  --text-subtle: #888888;
   --text-light: rgba(255, 255, 255, 0.4);
 
   /* Accents */
@@ -94,6 +94,7 @@
   --bs-body-color: #ffffff;
   --bs-link-color: #ffffff;
   --bs-link-hover-color: #e6f26b;
+  --bs-secondary-color: #b8b8b8;  /* Bootstrap's internal muted text var */
 }
 
 html, body {
@@ -135,6 +136,11 @@ p {
   color: var(--text-muted);
   line-height: 1.65;
 }
+
+/* Bootstrap utility class overrides — dark mode */
+.text-muted { color: var(--text-muted) !important; }
+.text-secondary { color: #b8b8b8 !important; }
+.small, small { color: var(--text-muted); }
 
 a {
   color: inherit;

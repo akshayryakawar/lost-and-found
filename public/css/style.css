@@ -63,8 +63,8 @@
   /* Radii */
   --radius-pill: 9999px;
   --radius-card-fan: 30px;
-  --radius-card: 22px;
-  --radius-panel: 24px;
+  --radius-panel: 28px;
+  --radius-card: 24px;
   --radius-md: 14px;
   --radius-sm: 10px;
 
@@ -82,7 +82,7 @@
 }
 
 /* ==========================================================================
-   Base Styles
+   Base Styles & Ambient Starfield Texture across ALL Pages
    ========================================================================== */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -102,6 +102,11 @@ html, body {
 
 body.theme-dark-body {
   background-color: var(--bg-page);
+  background-image: 
+    radial-gradient(ellipse at 50% -8%, rgba(123, 92, 255, 0.12) 0%, transparent 60%),
+    radial-gradient(circle at 85% 75%, rgba(25, 181, 232, 0.06) 0%, transparent 45%),
+    radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 38px 38px;
   color: var(--text-main);
   display: flex;
   flex-direction: column;
@@ -127,6 +132,73 @@ a {
   color: inherit;
   text-decoration: none;
   transition: var(--transition-smooth);
+}
+
+/* ==========================================================================
+   Reusable UI Components (.glass-panel, .glass-card, .page-header)
+   ========================================================================== */
+.glass-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  transition: var(--transition-smooth);
+}
+
+.glass-card:hover {
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Standard Inner Page Header */
+.page-header {
+  text-align: center;
+  margin-bottom: 2.2rem;
+  position: relative;
+}
+
+.page-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(230, 242, 107, 0.1);
+  border: 1px solid rgba(230, 242, 107, 0.3);
+  border-radius: var(--radius-pill);
+  padding: 0.3rem 0.95rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--accent-lime);
+  margin-bottom: 0.9rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.page-title {
+  font-family: 'Inter Tight', sans-serif;
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  color: #ffffff;
+  margin: 0 auto 0.5rem;
+}
+
+.page-subtitle {
+  font-size: 0.98rem;
+  color: var(--text-muted);
+  max-width: 580px;
+  margin: 0 auto;
+  line-height: 1.6;
 }
 
 /* ==========================================================================
@@ -165,7 +237,6 @@ a {
   filter: blur(50px);
 }
 
-/* Subtle dot grid / starfield */
 .starfield-texture {
   position: absolute;
   top: 0;
@@ -187,7 +258,7 @@ a {
   position: sticky;
   top: 0;
   z-index: 1050;
-  background: rgba(8, 8, 8, 0.7);
+  background: rgba(8, 8, 8, 0.75);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-subtle);
@@ -201,7 +272,6 @@ a {
   width: 100%;
 }
 
-/* Brand Asterisk Logo */
 .brand-link {
   display: flex;
   align-items: center;
@@ -230,7 +300,6 @@ a {
   color: #ffffff;
 }
 
-/* Center Glass Pill Dock */
 .nav-pill-dock {
   background: rgba(24, 24, 24, 0.85);
   border: 1px solid var(--border-medium);
@@ -266,7 +335,6 @@ a {
   font-weight: 600;
 }
 
-/* Right Nav Actions */
 .nav-actions {
   display: flex;
   align-items: center;
@@ -285,7 +353,9 @@ a {
   color: #ffffff;
 }
 
-/* Primary White Pill Button (Reference Image "Contact" style) */
+/* ==========================================================================
+   Buttons (Pill Design System)
+   ========================================================================== */
 .btn-pill-white {
   background: #ffffff;
   color: #0b0b0b !important;
@@ -300,6 +370,7 @@ a {
   transition: var(--transition-smooth);
   box-shadow: 0 4px 14px rgba(255, 255, 255, 0.18);
   white-space: nowrap;
+  text-decoration: none;
 }
 
 .btn-pill-white:hover {
@@ -309,7 +380,6 @@ a {
   color: #000000 !important;
 }
 
-/* Ghost Pill Button */
 .btn-pill-ghost {
   background: rgba(255, 255, 255, 0.06);
   color: #ffffff !important;
@@ -322,6 +392,7 @@ a {
   align-items: center;
   gap: 0.45rem;
   transition: var(--transition-smooth);
+  text-decoration: none;
 }
 
 .btn-pill-ghost:hover {
@@ -330,7 +401,48 @@ a {
   transform: translateY(-2px);
 }
 
-/* Lime Accent Arrow Chip */
+.btn-pill-danger {
+  background: var(--lost-bg);
+  color: var(--lost-color) !important;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.45rem 1.2rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--lost-border);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: var(--transition-smooth);
+}
+
+.btn-pill-danger:hover {
+  background: rgba(255, 90, 112, 0.25);
+  border-color: var(--lost-color);
+  color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
+.btn-pill-success {
+  background: var(--found-bg);
+  color: var(--found-color) !important;
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0.45rem 1.2rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--found-border);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: var(--transition-smooth);
+}
+
+.btn-pill-success:hover {
+  background: rgba(94, 228, 117, 0.25);
+  border-color: var(--found-color);
+  color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
 .arrow-chip {
   width: 22px;
   height: 22px;
@@ -351,7 +463,6 @@ a {
   transform: rotate(45deg);
 }
 
-/* User Profile & Notification Badges in Nav */
 .nav-icon-btn {
   width: 38px;
   height: 38px;
@@ -383,7 +494,6 @@ a {
   border: 2px solid var(--bg-page);
 }
 
-/* Mobile Navbar Toggle */
 .mobile-nav-toggle {
   display: none;
   background: transparent;
@@ -395,7 +505,7 @@ a {
 }
 
 /* ==========================================================================
-   Hero Section
+   Hero Section & Floating Elements
    ========================================================================== */
 .hero-section {
   position: relative;
@@ -404,7 +514,6 @@ a {
   overflow: hidden;
 }
 
-/* Eyebrow Label */
 .hero-eyebrow {
   display: inline-flex;
   align-items: center;
@@ -424,7 +533,6 @@ a {
   font-size: 0.85rem;
 }
 
-/* Hero Typography */
 .hero-headline {
   font-family: 'Inter Tight', sans-serif;
   font-size: clamp(2.6rem, 6vw, 4.8rem);
@@ -440,12 +548,12 @@ a {
   font-family: 'Instrument Serif', 'Playfair Display', serif;
   font-style: italic;
   font-weight: 400;
-  display: block;
+  display: inline-block;
   background: linear-gradient(180deg, #ffffff 20%, #9a9a9a 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  padding-bottom: 0.1em;
+  padding-bottom: 0.05em;
 }
 
 .hero-subtitle {
@@ -456,7 +564,6 @@ a {
   line-height: 1.7;
 }
 
-/* Hero Action Buttons */
 .hero-cta-group {
   display: flex;
   align-items: center;
@@ -466,9 +573,6 @@ a {
   flex-wrap: wrap;
 }
 
-/* ==========================================================================
-   Floating Name-Tag Chips & 3D Icons
-   ========================================================================== */
 .hero-floating-elements {
   position: absolute;
   top: 0;
@@ -479,7 +583,6 @@ a {
   z-index: 10;
 }
 
-/* Cursor Name-Tag Chips */
 .floating-cursor-chip {
   position: absolute;
   display: inline-flex;
@@ -500,7 +603,6 @@ a {
   transform: scale(1.08) translateY(-4px) !important;
 }
 
-/* Teal Chip (Left) - "Robert" style */
 .chip-teal {
   top: 28%;
   left: 10%;
@@ -511,7 +613,6 @@ a {
   animation-delay: 0s;
 }
 
-/* Coral-Pink Chip (Right) - "Clarissa" style */
 .chip-pink {
   top: 36%;
   right: 10%;
@@ -528,7 +629,6 @@ a {
   fill: currentColor;
 }
 
-/* Floating 3D Decorative Shapes */
 .floating-3d-shape {
   position: absolute;
   pointer-events: none;
@@ -566,14 +666,13 @@ a {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: -15px; /* Overlapping */
+  gap: -15px;
   position: relative;
   max-width: 1100px;
   margin: 0 auto;
   padding: 2rem 1rem 3rem;
 }
 
-/* Each Tall Rounded Card in Fan */
 .fan-card {
   width: 230px;
   height: 340px;
@@ -629,14 +728,12 @@ a {
   margin-left: -35px;
 }
 
-/* Hover Lift Effect */
 .fan-card:hover {
   transform: translateY(-24px) scale(1.08) rotate(0deg) !important;
   z-index: 15 !important;
   box-shadow: 0 35px 70px rgba(0, 0, 0, 0.75), 0 0 40px rgba(255, 255, 255, 0.2);
 }
 
-/* Fan Card Inner Structure */
 .fan-card-header {
   position: relative;
   z-index: 2;
@@ -658,7 +755,6 @@ a {
   text-transform: capitalize;
 }
 
-/* Floating "Get Started ↗" chip on center card */
 .fan-center-pill {
   position: absolute;
   top: 14px;
@@ -683,7 +779,6 @@ a {
   margin-left: 0;
 }
 
-/* 3D Illustration / Photo Area inside Fan Card */
 .fan-card-artwork {
   height: 190px;
   display: flex;
@@ -717,7 +812,7 @@ a {
 }
 
 /* ==========================================================================
-   Quick Stats & Categories Strip
+   Stats Strip & Category Grid
    ========================================================================== */
 .stats-strip-container {
   border-top: 1px solid var(--border-subtle);
@@ -747,7 +842,6 @@ a {
   letter-spacing: 0.05em;
 }
 
-/* Categories Grid */
 .category-bubble-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
@@ -849,7 +943,6 @@ a {
   color: rgba(255, 255, 255, 0.2);
 }
 
-/* Badges on Item Card */
 .badge-item-type {
   position: absolute;
   top: 12px;
@@ -974,7 +1067,7 @@ a {
 }
 
 /* ==========================================================================
-   Filter Card / Directory Tools
+   Filter Card & Forms
    ========================================================================== */
 .filter-card {
   background: var(--bg-surface);
@@ -984,7 +1077,7 @@ a {
   box-shadow: var(--shadow-card);
 }
 
-/* Form Controls Dark Override */
+/* Universal Dark Form Inputs */
 .form-control, .form-select {
   background-color: #141414 !important;
   border: 1px solid var(--border-medium) !important;
@@ -1000,6 +1093,7 @@ a {
   border-color: var(--accent-lime) !important;
   box-shadow: 0 0 0 3px rgba(230, 242, 107, 0.2) !important;
   outline: none !important;
+  color: #ffffff !important;
 }
 
 .form-control::placeholder {
@@ -1019,7 +1113,16 @@ a {
   margin-bottom: 0.4rem;
 }
 
-/* Segmented Pill Buttons */
+.form-check-input {
+  background-color: #1a1a1a !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+.form-check-input:checked {
+  background-color: var(--accent-lime) !important;
+  border-color: var(--accent-lime) !important;
+}
+
 .segmented-pill-group {
   background: #141414;
   border: 1px solid var(--border-medium);
@@ -1050,7 +1153,6 @@ a {
   color: #ffffff;
 }
 
-/* Upload Dropzone */
 .upload-dropzone {
   border: 2px dashed var(--border-medium);
   border-radius: var(--radius-card);
@@ -1130,7 +1232,6 @@ a {
   box-shadow: var(--shadow-card);
 }
 
-/* Stepper Progression */
 .stepper-progress {
   display: flex;
   justify-content: space-between;
@@ -1196,7 +1297,6 @@ a {
   color: #ffffff;
 }
 
-/* Spec Table */
 .meta-spec-table th {
   width: 32%;
   font-weight: 600;
@@ -1298,24 +1398,77 @@ a {
 }
 
 /* ==========================================================================
-   Modals & Toasts
+   Modals, Toasts, Dropdowns, Cards & Global Bootstrap Dark Overrides
    ========================================================================== */
+.card {
+  background-color: var(--bg-surface) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: var(--radius-card) !important;
+  color: #ffffff !important;
+}
+
+.card-header, .card-footer {
+  background-color: #161616 !important;
+  border-color: var(--border-subtle) !important;
+  color: #ffffff !important;
+}
+
+.table {
+  color: #ffffff !important;
+  border-color: var(--border-subtle) !important;
+}
+
+.table > :not(caption) > * > * {
+  background-color: transparent !important;
+  border-bottom-color: var(--border-subtle) !important;
+  color: #ffffff !important;
+}
+
 .modal-content {
-  background-color: #141414;
-  border: 1px solid var(--border-medium);
-  border-radius: var(--radius-panel);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
-  color: #ffffff;
+  background-color: #141414 !important;
+  border: 1px solid var(--border-medium) !important;
+  border-radius: var(--radius-panel) !important;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8) !important;
+  color: #ffffff !important;
 }
 
 .modal-header {
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle) !important;
   padding: 1.25rem 1.5rem;
 }
 
 .modal-footer {
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--border-subtle) !important;
   padding: 1.25rem 1.5rem;
+}
+
+.dropdown-menu {
+  background-color: #181818 !important;
+  border: 1px solid var(--border-medium) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+.dropdown-item {
+  color: var(--text-muted) !important;
+  border-radius: 10px !important;
+  padding: 0.5rem 1rem !important;
+  transition: var(--transition-fast) !important;
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+.dropdown-divider {
+  border-color: var(--border-subtle) !important;
+}
+
+.list-group-item {
+  background-color: var(--bg-surface) !important;
+  border-color: var(--border-subtle) !important;
+  color: #ffffff !important;
 }
 
 .btn-close {
@@ -1339,9 +1492,23 @@ a {
   min-width: 320px;
 }
 
-/* ==========================================================================
-   Footer
-   ========================================================================== */
+/* Breadcrumbs */
+.breadcrumb-item a {
+  color: var(--text-muted) !important;
+  text-decoration: none;
+}
+.breadcrumb-item a:hover {
+  color: #ffffff !important;
+}
+.breadcrumb-item.active {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+.breadcrumb-item + .breadcrumb-item::before {
+  color: var(--text-subtle) !important;
+}
+
+/* Footer */
 .footer-campus {
   background-color: #0c0c0c;
   border-top: 1px solid var(--border-subtle);
@@ -1407,7 +1574,6 @@ a {
   }
 }
 
-/* Scroll reveal class (managed by IntersectionObserver) */
 .reveal-fade-up {
   opacity: 0;
   transform: translateY(22px);
@@ -1434,24 +1600,19 @@ a {
   }
 }
 
-/* Tablets (max-width: 991px) */
 @media (max-width: 991px) {
   .nav-pill-dock {
-    display: none; /* Hide center dock on mobile/tablet */
+    display: none;
   }
-
   .mobile-nav-toggle {
     display: block;
   }
-
   .floating-cursor-chip {
-    display: none; /* Avoid crowding on tablet/mobile */
+    display: none;
   }
-
   .floating-3d-shape {
     display: none;
   }
-
   .card-fan-container {
     overflow-x: auto;
     scroll-snap-type: x mandatory;
@@ -1461,7 +1622,6 @@ a {
     gap: 16px;
     -webkit-overflow-scrolling: touch;
   }
-
   .fan-card {
     scroll-snap-align: center;
     transform: none !important;
@@ -1469,23 +1629,19 @@ a {
     width: 220px;
     height: 330px;
   }
-
   .fan-card-3 {
     width: 230px;
     height: 330px;
   }
 }
 
-/* Small Screens / Mobile (max-width: 575px) */
 @media (max-width: 575px) {
   .hero-headline {
     font-size: 2.3rem;
   }
-
   .hero-subtitle {
     font-size: 0.95rem;
   }
-
   .fan-card {
     width: 200px;
     height: 300px;

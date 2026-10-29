@@ -1,12 +1,26 @@
 <%- include('../../partials/head', { title: 'My Dashboard | Campus Lost & Found' }) %>
 <%- include('../../partials/navbar', { activePage: 'dashboard' }) %>
 
-<main class="py-4">
+<main class="py-4 position-relative">
   <div class="container">
     <%- include('../../partials/alerts') %>
 
+    <!-- Standard Inner Page Header -->
+    <div class="page-header text-center mb-4">
+      <div class="page-eyebrow">
+        <span class="eyebrow-icon">&#9679;</span>
+        <span>Student Workspace</span>
+      </div>
+      <h1 class="page-title">
+        My <span class="hero-accent-serif">Dashboard.</span>
+      </h1>
+      <p class="page-subtitle">
+        Manage your active reports, track submitted claims, and inspect custody verification status.
+      </p>
+    </div>
+
     <!-- Student Profile & Dashboard Banner -->
-    <div class="p-4 rounded-4 mb-4" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card);">
+    <div class="glass-panel p-4 mb-4">
       <div class="row align-items-center g-3">
         <div class="col-md-7">
           <div class="d-flex align-items-center gap-3">
@@ -14,7 +28,7 @@
               <%= currentUser.name.charAt(0).toUpperCase() %>
             </div>
             <div>
-              <h1 class="h3 fw-bold text-white mb-0"><%= currentUser.name %></h1>
+              <h2 class="h3 fw-bold text-white mb-0"><%= currentUser.name %></h2>
               <div class="text-muted small mt-1">
                 <i class="bi bi-envelope me-1"></i> <%= currentUser.email %> 
                 <span class="badge rounded-pill ms-2" style="background: rgba(25,181,232,0.15); color: var(--accent-cyan); border: 1px solid rgba(25,181,232,0.3);">
@@ -76,7 +90,7 @@
     </div>
 
     <!-- Tabs: Reports vs Claims -->
-    <div class="rounded-4 overflow-hidden" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card);">
+    <div class="glass-panel overflow-hidden">
       <div class="border-bottom p-3" style="border-color: var(--border-subtle) !important; background: #151515;">
         <ul class="nav gap-2" id="dashboardTab" role="tablist">
           <li class="nav-item" role="presentation">

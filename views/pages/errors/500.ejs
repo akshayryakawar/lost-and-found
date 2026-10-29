@@ -1,28 +1,47 @@
 <%- include('../../partials/head', { title: '500 - Server Error | Campus Lost & Found' }) %>
 <%- include('../../partials/navbar', { activePage: '' }) %>
 
-<main class="py-5 position-relative">
-  <!-- Subtle ambient glow -->
+<main class="py-5 position-relative overflow-hidden" style="min-height: 75vh; display: flex; align-items: center;">
+  <!-- Ambient glow and texture -->
   <div class="ambient-glow-wrapper">
-    <div class="ambient-glow-center" style="width: 500px; height: 500px;"></div>
+    <div class="ambient-glow-top"></div>
+    <div class="ambient-glow-center" style="width: 550px; height: 550px;"></div>
   </div>
 
-  <div class="container text-center py-5 position-relative" style="max-width: 620px; z-index: 5;">
-    <div class="mb-4">
+  <!-- Floating Cursor Chips like Hero -->
+  <div class="hero-floating-elements d-none d-lg-block">
+    <div class="floating-cursor-chip chip-teal" style="top: 25%; left: 12%;">
+      <svg class="chip-cursor-svg" viewBox="0 0 24 24"><path d="M4 3l15 8-6 2-2 6z"/></svg>
+      <span>Error 500</span>
+    </div>
+    <div class="floating-cursor-chip chip-pink" style="top: 30%; right: 12%;">
+      <svg class="chip-cursor-svg" viewBox="0 0 24 24" style="transform: rotate(90deg);"><path d="M4 3l15 8-6 2-2 6z"/></svg>
+      <span>Under Maintenance</span>
+    </div>
+  </div>
+
+  <div class="container text-center py-5 position-relative" style="max-width: 640px; z-index: 5;">
+    <div class="page-eyebrow mb-3">
+      <span class="eyebrow-icon">&#9679;</span>
+      <span>500 &mdash; Internal Error</span>
+    </div>
+
+    <div class="mb-3">
       <span class="asterisk-mark" style="font-size: 3.5rem; color: var(--lost-color);">&#10033;</span>
     </div>
 
-    <h1 class="display-4 fw-bold text-white mb-2" style="letter-spacing: -0.04em;">System Glitch</h1>
-    <h2 class="h5 text-muted mb-4">500 &mdash; An unexpected server error occurred while processing your request.</h2>
+    <h1 class="page-title mb-3">
+      System <span class="hero-accent-serif">Glitch.</span>
+    </h1>
 
-    <p class="text-muted mb-4" style="line-height: 1.7;">
-      Our systems team has been notified. Please try returning to the home directory or report the issue to campus security dispatch.
+    <p class="page-subtitle mb-4">
+      An unexpected hiccup occurred on our dispatch server. Our campus systems team has been notified. Please try returning to the home registry.
     </p>
 
     <div class="d-flex justify-content-center gap-3">
       <a href="/" class="btn-pill-white">
-        <span>Return to Homepage</span>
-        <span class="arrow-chip">&rarr;</span>
+        <span>Back to Home</span>
+        <span class="arrow-chip">&nearr;</span>
       </a>
       <a href="/items" class="btn-pill-ghost">
         <span>Browse Catalog</span>

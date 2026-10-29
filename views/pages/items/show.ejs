@@ -1,30 +1,40 @@
 <%- include('../../partials/head', { title: item.title + ' | Campus Lost & Found' }) %>
 <%- include('../../partials/navbar', { activePage: 'items' }) %>
 
-<main class="py-4">
+<main class="py-4 position-relative">
   <div class="container">
     <%- include('../../partials/alerts') %>
 
-    <!-- Breadcrumb Navigation -->
-    <nav aria-label="breadcrumb" class="mb-4">
-      <ol class="breadcrumb small">
-        <li class="breadcrumb-item"><a href="/" class="text-muted text-decoration-none">Home</a></li>
-        <li class="breadcrumb-item"><a href="/items" class="text-muted text-decoration-none">Items Directory</a></li>
-        <li class="breadcrumb-item active text-white text-truncate" aria-current="page" style="max-width: 300px;"><%= item.title %></li>
-      </ol>
-    </nav>
+    <!-- Standard Inner Page Header & Breadcrumbs -->
+    <div class="page-header mb-4">
+      <div class="page-eyebrow">
+        <span class="eyebrow-icon">&#9679;</span>
+        <span>Item Verification &amp; Details</span>
+      </div>
+      <h1 class="page-title">
+        Belonging <span class="hero-accent-serif">File.</span>
+      </h1>
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb justify-content-center small mb-0">
+          <li class="breadcrumb-item"><a href="/">Home</a></li>
+          <li class="breadcrumb-item"><a href="/items">Directory</a></li>
+          <li class="breadcrumb-item active text-truncate" style="max-width: 250px;"><%= item.title %></li>
+        </ol>
+      </nav>
+    </div>
 
     <!-- Potential Duplicate / Match Warning Banner (if present) -->
     <% if (typeof potentialMatch !== 'undefined' && potentialMatch) { %>
-      <div class="duplicate-alert-banner">
-        <i class="bi bi-lightbulb-fill fs-4 mt-1"></i>
+      <div class="glass-panel p-4 mb-4 d-flex align-items-center gap-3" style="background: rgba(255, 176, 32, 0.1); border-color: rgba(255, 176, 32, 0.35);">
+        <i class="bi bi-lightbulb-fill fs-3" style="color: var(--accent-amber);"></i>
         <div class="flex-grow-1">
-          <div class="fw-bold">Potential <%= item.type === 'lost' ? 'Found' : 'Lost' %> Match Detected!</div>
-          <p class="mb-2 small">
-            A similar item entitled <strong>"<%= potentialMatch.title %>"</strong> was reported at <strong><%= potentialMatch.location %></strong> on <%= new Date(potentialMatch.dateLostOrFound || potentialMatch.date_lost_or_found).toLocaleDateString() %>.
+          <div class="fw-bold text-white">Potential <%= item.type === 'lost' ? 'Found' : 'Lost' %> Match Cross-Referenced!</div>
+          <p class="mb-2 small text-muted">
+            A similar item entitled <strong class="text-white">"<%= potentialMatch.title %>"</strong> was registered at <strong class="text-white"><%= potentialMatch.location %></strong>.
           </p>
-          <a href="/items/<%= potentialMatch.id || potentialMatch._id %>" class="btn btn-sm fw-bold rounded-pill px-3" style="background: var(--accent-amber); color: #000;">
-            <i class="bi bi-eye me-1"></i> Review Matched Item
+          <a href="/items/<%= potentialMatch.id || potentialMatch._id %>" class="btn-pill-white btn-sm px-3">
+            <span>Review Matched Item</span>
+            <span class="arrow-chip" style="width: 18px; height: 18px; font-size: 0.65rem;">&rarr;</span>
           </a>
         </div>
       </div>
@@ -33,9 +43,9 @@
     <div class="row g-4">
       <!-- Left Column: Item Image & Security Protocol -->
       <div class="col-lg-5">
-        <div class="item-detail-gallery mb-4">
+        <div class="glass-panel p-2 mb-4 d-flex align-items-center justify-content-center overflow-hidden" style="min-height: 380px;">
           <% if (item.imageUrl || item.image_url) { %>
-            <img src="<%= item.imageUrl || item.image_url %>" alt="<%= item.title %>" class="img-fluid rounded-4" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center p-5\'><i class=\'bi bi-box-seam display-1 text-muted\'></i><p class=\'text-muted mt-2\'>No photo provided</p></div>';">
+            <img src="<%= item.imageUrl || item.image_url %>" alt="<%= item.title %>" class="img-fluid rounded-4" style="max-height: 440px; object-fit: contain;" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'text-center p-5\'><i class=\'bi bi-box-seam display-1 text-muted\'></i><p class=\'text-muted mt-2\'>No photo provided</p></div>';">
           <% } else { %>
             <div class="text-center p-5">
               <i class="bi <%= item.type === 'lost' ? 'bi-search' : 'bi-box-seam' %> display-1 text-muted"></i>
@@ -44,25 +54,25 @@
           <% } %>
         </div>
 
-        <!-- Safe Recovery Card -->
-        <div class="p-4 rounded-4" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card);">
+        <!-- Safe Recovery Protocol Card -->
+        <div class="glass-panel p-4">
           <h6 class="fw-bold text-white d-flex align-items-center gap-2 mb-2">
-            <i class="bi bi-shield-check" style="color: var(--accent-lime);"></i> Campus Handover Protocol
+            <i class="bi bi-shield-check" style="color: var(--accent-lime);"></i> Campus Custody Protocol
           </h6>
-          <p class="small text-muted mb-2">
-            Items registered through the portal must be surrendered to or claimed from the <strong class="text-white">Student Center Security Desk</strong>.
+          <p class="small text-muted mb-3">
+            Items registered through the portal must be surrendered to or claimed from the <strong class="text-white">Student Center Security Desk (Room 102)</strong>.
           </p>
           <div class="small p-3 rounded-3 text-muted" style="background: #181818; border: 1px solid var(--border-subtle);">
-            <i class="bi bi-info-circle me-1" style="color: var(--accent-cyan);"></i> Be prepared to show your Student ID and demonstrate proof of ownership.
+            <i class="bi bi-info-circle me-1" style="color: var(--accent-cyan);"></i> Always bring your official University Student ID for claim collection.
           </div>
         </div>
       </div>
 
       <!-- Right Column: Metadata, Description & Claim Action -->
       <div class="col-lg-7">
-        <div class="item-detail-meta-card">
-          <!-- Stepper / Status Progression -->
-          <div class="stepper-progress">
+        <div class="glass-panel p-4 p-md-5">
+          <!-- Stepper Progression -->
+          <div class="stepper-progress mb-4">
             <div class="stepper-step <%= item.status === 'open' || item.status === 'under_review' || item.status === 'claimed' || item.status === 'returned' ? 'completed' : '' %>">
               <div class="stepper-circle"><i class="bi bi-check-lg"></i></div>
               <div class="stepper-title">Reported</div>

@@ -1,52 +1,63 @@
 <%- include('../../partials/head', { title: 'Notifications | Campus Lost & Found' }) %>
 <%- include('../../partials/navbar', { activePage: 'notifications' }) %>
 
-<main class="py-4">
-  <div class="container" style="max-width: 760px;">
+<main class="py-4 position-relative">
+  <div class="container" style="max-width: 780px;">
     <%- include('../../partials/alerts') %>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h1 class="h3 fw-bold text-white mb-1">Campus Alerts &amp; Notifications</h1>
-        <p class="text-muted small mb-0">Stay informed about your reports and submitted claims</p>
+    <!-- Standard Inner Page Header -->
+    <div class="page-header text-center mb-4">
+      <div class="page-eyebrow">
+        <span class="eyebrow-icon">&#9679;</span>
+        <span>Alerts &amp; Activity</span>
       </div>
+      <h1 class="page-title">
+        Campus <span class="hero-accent-serif">Notifications.</span>
+      </h1>
+      <p class="page-subtitle">
+        Stay updated on custody verification, match alerts, and submitted claim approvals.
+      </p>
+
       <% if (notifications && notifications.length > 0) { %>
-        <form action="/notifications/mark-read" method="POST">
-          <button type="submit" class="btn-pill-ghost btn-sm px-3">
-            <i class="bi bi-check2-all me-1"></i> Mark All as Read
-          </button>
-        </form>
+        <div class="mt-3">
+          <form action="/notifications/mark-read" method="POST" class="d-inline">
+            <button type="submit" class="btn-pill-ghost btn-sm px-4">
+              <i class="bi bi-check2-all me-1"></i> Mark All as Read
+            </button>
+          </form>
+        </div>
       <% } %>
     </div>
 
-    <div class="rounded-4 overflow-hidden" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card);">
+    <!-- Notifications List Card -->
+    <div class="glass-panel overflow-hidden">
       <div class="list-group list-group-flush">
         <% if (notifications && notifications.length > 0) { %>
           <% notifications.forEach(notif => { %>
-            <div class="list-group-item p-3 d-flex align-items-start gap-3 border-bottom" style="background: <%= notif.isRead ? 'transparent' : 'rgba(230,242,107,0.04)' %>; border-color: var(--border-subtle) !important;">
-              <div class="rounded-circle p-2 mt-1 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: <%= notif.isRead ? '#1a1a1a' : 'rgba(230,242,107,0.15)' %>; color: <%= notif.isRead ? 'var(--text-muted)' : 'var(--accent-lime)' %>; border: 1px solid var(--border-subtle);">
-                <i class="bi <%= notif.type === 'claim_status' ? 'bi-patch-check' : (notif.type === 'item_status' ? 'bi-box-seam' : 'bi-bell') %>"></i>
+            <div class="list-group-item p-3 p-md-4 d-flex align-items-start gap-3 border-bottom" style="background: <%= notif.isRead ? 'transparent' : 'rgba(230,242,107,0.04)' %>; border-color: var(--border-subtle) !important;">
+              <div class="rounded-circle p-2 mt-1 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px; background: <%= notif.isRead ? '#1a1a1a' : 'rgba(230,242,107,0.15)' %>; color: <%= notif.isRead ? 'var(--text-muted)' : 'var(--accent-lime)' %>; border: 1px solid var(--border-subtle);">
+                <i class="bi <%= notif.type === 'claim_status' ? 'bi-patch-check' : (notif.type === 'item_status' ? 'bi-box-seam' : 'bi-bell') %> fs-5"></i>
               </div>
 
               <div class="flex-grow-1">
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                  <span class="badge rounded-pill small" style="background: rgba(255,255,255,0.08); color: var(--text-muted); font-size: 0.7rem;">
+                  <span class="badge rounded-pill small" style="background: rgba(255,255,255,0.08); color: var(--text-muted); font-size: 0.7rem; border: 1px solid var(--border-subtle);">
                     <%= notif.type.replace('_', ' ').toUpperCase() %>
                   </span>
-                  <small class="text-muted"><%= new Date(notif.createdAt).toLocaleDateString() %></small>
+                  <small class="text-muted"><%= new Date(notif.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) %></small>
                 </div>
-                <p class="mb-1 text-white fw-medium" style="font-size: 0.92rem;"><%= notif.message %></p>
+                <p class="mb-0 text-white fw-medium" style="font-size: 0.94rem; line-height: 1.5;"><%= notif.message %></p>
               </div>
 
               <% if (!notif.isRead) { %>
-                <span class="rounded-circle align-self-center" style="width: 8px; height: 8px; background: var(--accent-lime);" title="Unread"></span>
+                <span class="rounded-circle align-self-center flex-shrink-0 ms-2" style="width: 10px; height: 10px; background: var(--accent-lime); box-shadow: var(--glow-lime);" title="Unread notification"></span>
               <% } %>
             </div>
           <% }); %>
         <% } else { %>
           <div class="p-5 text-center">
             <i class="bi bi-bell-slash display-4 text-muted mb-3 d-block"></i>
-            <h5 class="fw-bold text-white">No notifications yet</h5>
+            <h5 class="fw-bold text-white">No notifications right now</h5>
             <p class="text-muted small">You will receive alerts when security updates your reports or responds to your claims.</p>
           </div>
         <% } %>

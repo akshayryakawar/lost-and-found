@@ -1,36 +1,37 @@
 <%- include('../../partials/head', { title: 'Browse Campus Items | Campus Lost & Found' }) %>
 <%- include('../../partials/navbar', { activePage: 'items', activeType: currentFilters.type }) %>
 
-<main class="py-4">
+<main class="py-4 position-relative">
   <div class="container">
     <%- include('../../partials/alerts') %>
 
-    <!-- Header & Breadcrumbs -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-      <div>
-        <nav aria-label="breadcrumb">
-          <ol class="breadcrumb mb-1 small">
-            <li class="breadcrumb-item"><a href="/" class="text-muted text-decoration-none">Home</a></li>
-            <li class="breadcrumb-item active text-white" aria-current="page">Browse Catalog</li>
-          </ol>
-        </nav>
-        <h1 class="h3 fw-bold text-white mb-0">Campus Belongings Directory</h1>
+    <!-- Standard Inner Page Header -->
+    <div class="page-header">
+      <div class="page-eyebrow">
+        <span class="eyebrow-icon">&#9679;</span>
+        <span>Campus Registry Directory</span>
       </div>
+      <h1 class="page-title">
+        Browse <span class="hero-accent-serif">Catalog.</span>
+      </h1>
+      <p class="page-subtitle">
+        Search, filter, and track belongings across university libraries, labs, and student centers.
+      </p>
 
-      <div class="d-flex gap-2">
-        <a href="/items/report?type=lost" class="btn btn-sm rounded-pill px-3" style="background: rgba(255,90,112,0.15); color: #ff5a70; border: 1px solid rgba(255,90,112,0.3); font-weight: 600;">
-          <i class="bi bi-search me-1"></i> Report Lost
+      <div class="d-flex justify-content-center gap-3 mt-4">
+        <a href="/items/report?type=lost" class="btn-pill-danger">
+          <i class="bi bi-search me-1"></i> Report Lost Item
         </a>
-        <a href="/items/report?type=found" class="btn btn-sm rounded-pill px-3" style="background: rgba(94,228,117,0.15); color: #5ee475; border: 1px solid rgba(94,228,117,0.3); font-weight: 600;">
-          <i class="bi bi-plus-circle me-1"></i> Report Found
+        <a href="/items/report?type=found" class="btn-pill-success">
+          <i class="bi bi-plus-circle me-1"></i> Report Found Item
         </a>
       </div>
     </div>
 
-    <!-- Filter Card -->
-    <div class="filter-card mb-4">
+    <!-- Glass Filter Bar -->
+    <div class="glass-panel p-4 mb-5">
       <form action="/items" method="GET" id="filterForm">
-        <div class="row g-3">
+        <div class="row g-3 align-items-end">
           <!-- Keyword Search -->
           <div class="col-lg-4 col-md-6">
             <label class="form-label small text-muted">Keyword Search</label>
@@ -40,9 +41,9 @@
             </div>
           </div>
 
-          <!-- Type Filter Toggle -->
+          <!-- Type Filter -->
           <div class="col-lg-2 col-md-6">
-            <label class="form-label small text-muted">Item Type</label>
+            <label class="form-label small text-muted">Type</label>
             <select name="type" class="form-select" onchange="this.form.submit()">
               <option value="" <%= !currentFilters.type ? 'selected' : '' %>>All Types</option>
               <option value="lost" <%= currentFilters.type === 'lost' ? 'selected' : '' %>>Lost Items</option>
@@ -82,7 +83,7 @@
             </select>
           </div>
 
-          <!-- Status & Sort Filter -->
+          <!-- Status Filter -->
           <div class="col-lg-2 col-md-4">
             <label class="form-label small text-muted">Status</label>
             <select name="status" class="form-select" onchange="this.form.submit()">
@@ -95,7 +96,7 @@
           </div>
         </div>
 
-        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 flex-wrap gap-2" style="border-top: 1px solid var(--border-subtle);">
+        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 flex-wrap gap-2" style="border-top: 1px solid var(--border-subtle);">
           <div class="d-flex align-items-center gap-2 small text-muted">
             <span>Showing <strong class="text-white"><%= items.length %></strong> of <strong class="text-white"><%= pagination.totalItems %></strong> items</span>
             <% if (currentFilters.search || currentFilters.type || currentFilters.category || currentFilters.location || currentFilters.status) { %>
@@ -117,44 +118,47 @@
     </div>
 
     <!-- Items Listing Grid -->
-    <div class="row">
+    <div class="row g-4">
       <% if (items && items.length > 0) { %>
         <% items.forEach(item => { %>
           <%- include('../../partials/item-card', { item: item }) %>
         <% }); %>
       <% } else { %>
         <div class="col-12">
-          <div class="text-center py-5 p-4 rounded-4" style="background: var(--bg-surface); border: 1px dashed var(--border-medium);">
+          <div class="glass-panel text-center py-5 p-4">
             <i class="bi bi-search display-4 text-muted mb-3 d-block"></i>
             <h4 class="fw-bold text-white">No items found</h4>
             <p class="text-muted mx-auto" style="max-width: 500px;">
               We couldn't find any reports matching your search and filter criteria. Try clearing some filters or searching with different keywords.
             </p>
-            <div class="d-flex justify-content-center gap-2 mt-3">
+            <div class="d-flex justify-content-center gap-2 mt-4">
               <a href="/items" class="btn-pill-ghost">Clear All Filters</a>
-              <a href="/items/report" class="btn-pill-white">Submit a Report</a>
+              <a href="/items/report" class="btn-pill-white">
+                <span>Submit a Report</span>
+                <span class="arrow-chip">&nearr;</span>
+              </a>
             </div>
           </div>
         </div>
       <% } %>
     </div>
 
-    <!-- Pagination Controls -->
+    <!-- Pagination Controls (Pill Buttons) -->
     <% if (pagination.totalPages > 1) { %>
-      <nav aria-label="Page navigation" class="mt-4">
-        <ul class="pagination justify-content-center gap-1">
+      <nav aria-label="Page navigation" class="mt-5">
+        <ul class="pagination justify-content-center gap-2">
           <li class="page-item <%= pagination.currentPage <= 1 ? 'disabled' : '' %>">
-            <a class="btn-pill-ghost btn-sm rounded-pill me-2 px-3 text-decoration-none" href="/items?page=<%= pagination.currentPage - 1 %>">Previous</a>
+            <a class="btn-pill-ghost btn-sm rounded-pill px-3 text-decoration-none" href="/items?page=<%= pagination.currentPage - 1 %>">Previous</a>
           </li>
 
           <% for (let p = 1; p <= pagination.totalPages; p++) { %>
             <li class="page-item <%= pagination.currentPage === p ? 'active' : '' %>">
-              <a class="btn-pill-ghost btn-sm rounded-pill mx-1 px-3 text-decoration-none <%= pagination.currentPage === p ? 'border-light' : '' %>" style="<%= pagination.currentPage === p ? 'background: #ffffff; color: #000000 !important; font-weight: 700;' : '' %>" href="/items?page=<%= p %>"><%= p %></a>
+              <a class="btn-pill-ghost btn-sm rounded-pill px-3 text-decoration-none" style="<%= pagination.currentPage === p ? 'background: #ffffff; color: #000000 !important; font-weight: 700;' : '' %>" href="/items?page=<%= p %>"><%= p %></a>
             </li>
           <% } %>
 
           <li class="page-item <%= pagination.currentPage >= pagination.totalPages ? 'disabled' : '' %>">
-            <a class="btn-pill-ghost btn-sm rounded-pill ms-2 px-3 text-decoration-none" href="/items?page=<%= pagination.currentPage + 1 %>">Next</a>
+            <a class="btn-pill-ghost btn-sm rounded-pill px-3 text-decoration-none" href="/items?page=<%= pagination.currentPage + 1 %>">Next</a>
           </li>
         </ul>
       </nav>

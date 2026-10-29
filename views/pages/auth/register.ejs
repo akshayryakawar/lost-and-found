@@ -2,21 +2,31 @@
 <%- include('../../partials/navbar', { activePage: 'register' }) %>
 
 <main class="py-5 position-relative">
-  <!-- Subtle ambient glow behind register card -->
+  <!-- Ambient glow blobs behind the centered card -->
   <div class="ambient-glow-wrapper">
-    <div class="ambient-glow-center" style="width: 550px; height: 550px; opacity: 0.8;"></div>
+    <div class="ambient-glow-top"></div>
+    <div class="ambient-glow-center" style="width: 540px; height: 540px; opacity: 0.9;"></div>
   </div>
 
   <div class="container position-relative" style="max-width: 520px; z-index: 5;">
     <%- include('../../partials/alerts') %>
 
-    <div class="p-4 p-md-5 rounded-4" style="background: var(--bg-surface); border: 1px solid var(--border-medium); box-shadow: var(--shadow-card); backdrop-filter: blur(12px);">
-      <div class="text-center mb-4">
-        <span class="asterisk-mark mb-2" style="font-size: 2.2rem;">&#10033;</span>
-        <h2 class="h3 fw-bold text-white mb-1">Create Student Account</h2>
-        <p class="text-muted small">Register to track reports, receive return alerts, and submit claims</p>
+    <!-- Standard Page Header -->
+    <div class="page-header text-center mb-4">
+      <div class="page-eyebrow">
+        <span class="eyebrow-icon">&#9679;</span>
+        <span>Join the Network</span>
       </div>
+      <h1 class="page-title">
+        Create <span class="hero-accent-serif">Account.</span>
+      </h1>
+      <p class="page-subtitle">
+        Register with your university email to track reports, submit claims, and safeguard campus gear.
+      </p>
+    </div>
 
+    <!-- Centered Glass Card -->
+    <div class="glass-panel p-4 p-md-5">
       <form action="/auth/register" method="POST" id="registerForm" class="needs-validation" novalidate>
         <div class="mb-3">
           <label for="regName" class="form-label text-white">Full Name <span style="color: var(--lost-color);">*</span></label>
@@ -32,7 +42,7 @@
             <span class="input-group-text border-end-0 text-muted"><i class="bi bi-envelope"></i></span>
             <input type="email" class="form-control border-start-0 ps-0" id="regEmail" name="email" placeholder="alex.chen@university.edu" required>
           </div>
-          <div class="small text-muted mt-1" style="font-size: 0.76rem;">Please use your valid university student or staff email address.</div>
+          <div class="small text-muted mt-1" style="font-size: 0.76rem;">Please use your official university student or faculty email address.</div>
         </div>
 
         <div class="row g-2 mb-3">
@@ -53,14 +63,14 @@
         </div>
 
         <div class="mb-4 form-check">
-          <input type="checkbox" class="form-check-input" id="termsCheck" required style="background-color: #1a1a1a; border-color: rgba(255,255,255,0.2);">
+          <input type="checkbox" class="form-check-input" id="termsCheck" required>
           <label class="form-check-label small text-muted" for="termsCheck">
             I agree to the <a href="#" class="text-white text-decoration-none">Campus Lost &amp; Found Honor Code</a> and terms of service.
           </label>
         </div>
 
         <button type="submit" class="btn-pill-white w-100 justify-content-center py-2 mb-3">
-          <span>Create Account</span>
+          <span>Create Student Account</span>
           <span class="arrow-chip">&nearr;</span>
         </button>
 

@@ -2,21 +2,31 @@
 <%- include('../../partials/navbar', { activePage: 'login' }) %>
 
 <main class="py-5 position-relative">
-  <!-- Subtle ambient glow behind login card -->
+  <!-- Ambient glow blobs behind the centered card -->
   <div class="ambient-glow-wrapper">
-    <div class="ambient-glow-center" style="width: 500px; height: 500px; opacity: 0.8;"></div>
+    <div class="ambient-glow-top"></div>
+    <div class="ambient-glow-center" style="width: 520px; height: 520px; opacity: 0.9;"></div>
   </div>
 
   <div class="container position-relative" style="max-width: 480px; z-index: 5;">
     <%- include('../../partials/alerts') %>
 
-    <div class="p-4 p-md-5 rounded-4" style="background: var(--bg-surface); border: 1px solid var(--border-medium); box-shadow: var(--shadow-card); backdrop-filter: blur(12px);">
-      <div class="text-center mb-4">
-        <span class="asterisk-mark mb-2" style="font-size: 2.2rem;">&#10033;</span>
-        <h2 class="h3 fw-bold text-white mb-1">Campus Sign In</h2>
-        <p class="text-muted small">Log in with your university credentials to manage items and claims</p>
+    <!-- Standard Page Header -->
+    <div class="page-header text-center mb-4">
+      <div class="page-eyebrow">
+        <span class="eyebrow-icon">&#9679;</span>
+        <span>Secure Access</span>
       </div>
+      <h1 class="page-title">
+        Portal <span class="hero-accent-serif">Sign In.</span>
+      </h1>
+      <p class="page-subtitle">
+        Access your reported items, track pending claims, and receive real-time match alerts.
+      </p>
+    </div>
 
+    <!-- Centered Glass Card -->
+    <div class="glass-panel p-4 p-md-5">
       <!-- Quick Demo Login Buttons for Evaluators -->
       <div class="p-3 rounded-3 mb-4 text-center" style="background: #181818; border: 1px solid var(--border-subtle);">
         <div class="small fw-bold text-muted mb-2">&boxbox; Quick Demo Credentials:</div>
@@ -24,7 +34,7 @@
           <button type="button" class="btn btn-sm btn-pill-ghost py-1 px-3" id="btnDemoStudent" style="font-size: 0.78rem;">
             Student Demo
           </button>
-          <button type="button" class="btn btn-sm py-1 px-3 rounded-pill" id="btnDemoAdmin" style="background: rgba(255,90,112,0.15); color: #ff5a70; border: 1px solid rgba(255,90,112,0.3); font-size: 0.78rem; font-weight: 600;">
+          <button type="button" class="btn btn-sm btn-pill-danger py-1 px-3" id="btnDemoAdmin" style="font-size: 0.78rem;">
             Admin Demo
           </button>
         </div>
@@ -51,8 +61,8 @@
         </div>
 
         <div class="mb-4 form-check">
-          <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe" style="background-color: #1a1a1a; border-color: rgba(255,255,255,0.2);">
-          <label class="form-check-label small text-muted" for="rememberMe">Remember my device</label>
+          <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
+          <label class="form-check-label small text-muted" for="rememberMe">Remember this browser</label>
         </div>
 
         <button type="submit" class="btn-pill-white w-100 justify-content-center py-2 mb-3">

@@ -1,23 +1,27 @@
 <%- include('../../partials/head', { title: 'Admin Moderation Portal | Campus Lost & Found' }) %>
 <%- include('../../partials/navbar', { activePage: 'admin' }) %>
 
-<main class="py-4">
+<main class="py-4 position-relative">
   <div class="container-fluid px-lg-5">
     <%- include('../../partials/alerts') %>
 
-    <!-- Admin Header -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
-      <div>
-        <div class="badge rounded-pill px-3 py-2 fw-bold mb-1" style="background: rgba(255,90,112,0.15); color: #ff5a70; border: 1px solid rgba(255,90,112,0.3);">
-          <i class="bi bi-shield-lock-fill me-1"></i> Campus Administration &amp; Security
-        </div>
-        <h1 class="h3 fw-bold text-white mb-0">Management &amp; Dispatch Console</h1>
+    <!-- Standard Inner Page Header -->
+    <div class="page-header text-center mb-4">
+      <div class="page-eyebrow">
+        <span class="eyebrow-icon">&#9679;</span>
+        <span>Security &amp; Moderation Center</span>
       </div>
+      <h1 class="page-title">
+        Dispatch <span class="hero-accent-serif">Console.</span>
+      </h1>
+      <p class="page-subtitle">
+        Review ownership claims, verify item proof, and update custody inventories in real-time.
+      </p>
 
-      <div class="d-flex gap-2">
-        <a href="/items/report" class="btn-pill-white btn-sm px-3">
-          <span>Log Found Item</span>
-          <span class="arrow-chip" style="width: 18px; height: 18px; font-size: 0.65rem;">&nearr;</span>
+      <div class="d-flex justify-content-center gap-2 mt-4">
+        <a href="/items/report" class="btn-pill-white">
+          <span>Log Found Belonging</span>
+          <span class="arrow-chip">&nearr;</span>
         </a>
       </div>
     </div>
@@ -74,7 +78,7 @@
     </div>
 
     <!-- Admin Main Tabs -->
-    <div class="rounded-4 overflow-hidden" style="background: var(--bg-surface); border: 1px solid var(--border-subtle); box-shadow: var(--shadow-card);">
+    <div class="glass-panel overflow-hidden">
       <div class="border-bottom p-3" style="border-color: var(--border-subtle) !important; background: #151515;">
         <ul class="nav gap-2" id="adminTab" role="tablist">
           <li class="nav-item" role="presentation">
@@ -89,7 +93,7 @@
           </li>
           <li class="nav-item" role="presentation">
             <button class="btn btn-pill-ghost btn-sm" id="users-tab" data-bs-toggle="tab" data-bs-target="#admin-users-pane" type="button" role="tab" aria-controls="admin-users-pane" aria-selected="false">
-              <i class="bi bi-people me-1"></i> User Accounts (<%= users.length %>)
+              <i class="bi bi-people me-1"></i> User Directory (<%= users.length %>)
             </button>
           </li>
         </ul>
@@ -154,12 +158,12 @@
                           <% if (claim.status === 'pending') { %>
                             <div class="d-flex justify-content-end gap-2">
                               <form action="/admin/claims/<%= claim.id || claim._id %>/approve" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-sm rounded-pill px-3" style="background: var(--accent-green); color: #000; font-weight: 600;" onclick="return confirm('Approve this claim? Item will be marked under review/ready for collection.')">
+                                <button type="submit" class="btn-pill-success btn-sm px-3" onclick="return confirm('Approve this claim? Item will be marked under review/ready for collection.')">
                                   <i class="bi bi-check-lg"></i> Approve
                                 </button>
                               </form>
                               <form action="/admin/claims/<%= claim.id || claim._id %>/reject" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('Reject this claim?')">
+                                <button type="submit" class="btn-pill-danger btn-sm px-3" onclick="return confirm('Reject this claim?')">
                                   <i class="bi bi-x-lg"></i> Reject
                                 </button>
                               </form>
@@ -245,9 +249,9 @@
             </div>
           </div>
 
-          <!-- Pane 3: User Accounts -->
+          <!-- Pane 3: User Directory -->
           <div class="tab-pane fade" id="admin-users-pane" role="tabpanel" aria-labelledby="users-tab">
-            <h5 class="fw-bold text-white mb-3">Registered Campus Users</h5>
+            <h5 class="fw-bold text-white mb-3">Registered Campus Accounts</h5>
             <div class="table-responsive">
               <table class="table table-custom align-middle">
                 <thead>

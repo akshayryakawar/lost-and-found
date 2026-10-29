@@ -88,10 +88,18 @@
   box-sizing: border-box;
 }
 
+/* ==== HARD FORCE DARK: beats every Bootstrap rule ==== */
+:root {
+  --bs-body-bg: #080808;
+  --bs-body-color: #ffffff;
+  --bs-link-color: #ffffff;
+  --bs-link-hover-color: #e6f26b;
+}
+
 html, body {
-  background-color: var(--bg-page);
-  color: var(--text-main);
-  font-family: 'Inter Tight', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #080808 !important;
+  color: #ffffff !important;
+  font-family: 'Inter Tight', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
   min-height: 100vh;
   margin: 0;
   padding: 0;
@@ -129,9 +137,14 @@ p {
 }
 
 a {
-  color: inherit;
-  text-decoration: none;
+  color: inherit !important;
+  text-decoration: none !important;
   transition: var(--transition-smooth);
+}
+
+/* Override Bootstrap's hardcoded link blue */
+a:not(.btn):not(.nav-link):not(.dropdown-item) {
+  color: var(--text-main) !important;
 }
 
 /* ==========================================================================

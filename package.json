@@ -1,0 +1,31 @@
+{
+  "name": "campus-lost-and-found",
+  "version": "1.0.0",
+  "description": "Campus Lost and Found Web Application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "test": "node tests/phase2.test.js && node tests/dbservice.test.js && node tests/auth_integration.test.js"
+  },
+  "keywords": [
+    "campus",
+    "lost-and-found",
+    "express",
+    "ejs",
+    "bootstrap5",
+    "nodejs"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
+    "bcryptjs": "^3.0.3",
+    "connect-flash": "^0.1.1",
+    "dotenv": "^18.0.9",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-session": "^1.19.0",
+    "multer": "^2.5.0"
+  }
+}

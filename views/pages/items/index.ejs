@@ -1,0 +1,167 @@
+<%- include('../../partials/head', { title: 'Browse Campus Items | Campus Lost & Found' }) %>
+<%- include('../../partials/navbar', { activePage: 'items', activeType: currentFilters.type }) %>
+
+<main class="py-4">
+  <div class="container">
+    <%- include('../../partials/alerts') %>
+
+    <!-- Header & Breadcrumbs -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+      <div>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-1 small">
+            <li class="breadcrumb-item"><a href="/" class="text-decoration-none">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Browse Items</li>
+          </ol>
+        </nav>
+        <h1 class="h3 fw-bold mb-0">Campus Lost &amp; Found Directory</h1>
+      </div>
+
+      <div class="d-flex gap-2">
+        <a href="/items/report?type=lost" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+          <i class="bi bi-search me-1"></i> Report Lost
+        </a>
+        <a href="/items/report?type=found" class="btn btn-outline-success btn-sm rounded-pill px-3">
+          <i class="bi bi-plus-circle me-1"></i> Report Found
+        </a>
+      </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="filter-card mb-4">
+      <form action="/items" method="GET" id="filterForm">
+        <div class="row g-3">
+          <!-- Keyword Search -->
+          <div class="col-lg-4 col-md-6">
+            <label class="form-label small text-muted">Keyword Search</label>
+            <div class="input-group">
+              <span class="input-group-text border-end-0 text-muted"><i class="bi bi-search"></i></span>
+              <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="e.g. Laptop, ID card, jacket..." value="<%= currentFilters.search || '' %>">
+            </div>
+          </div>
+
+          <!-- Type Filter Toggle -->
+          <div class="col-lg-2 col-md-6">
+            <label class="form-label small text-muted">Item Type</label>
+            <select name="type" class="form-select" onchange="this.form.submit()">
+              <option value="" <%= !currentFilters.type ? 'selected' : '' %>>All Types</option>
+              <option value="lost" <%= currentFilters.type === 'lost' ? 'selected' : '' %>>Lost Items</option>
+              <option value="found" <%= currentFilters.type === 'found' ? 'selected' : '' %>>Found Items</option>
+            </select>
+          </div>
+
+          <!-- Category Filter -->
+          <div class="col-lg-2 col-md-4">
+            <label class="form-label small text-muted">Category</label>
+            <select name="category" class="form-select" onchange="this.form.submit()">
+              <option value="">All Categories</option>
+              <option value="electronics" <%= currentFilters.category === 'electronics' ? 'selected' : '' %>>Electronics</option>
+              <option value="id_cards" <%= currentFilters.category === 'id_cards' ? 'selected' : '' %>>Student IDs & Cards</option>
+              <option value="keys_wallets" <%= currentFilters.category === 'keys_wallets' ? 'selected' : '' %>>Keys & Wallets</option>
+              <option value="bags_backpacks" <%= currentFilters.category === 'bags_backpacks' ? 'selected' : '' %>>Bags & Backpacks</option>
+              <option value="books_notes" <%= currentFilters.category === 'books_notes' ? 'selected' : '' %>>Books & Notes</option>
+              <option value="clothing" <%= currentFilters.category === 'clothing' ? 'selected' : '' %>>Clothing</option>
+              <option value="accessories" <%= currentFilters.category === 'accessories' ? 'selected' : '' %>>Accessories</option>
+              <option value="sports" <%= currentFilters.category === 'sports' ? 'selected' : '' %>>Sports Equipment</option>
+              <option value="other" <%= currentFilters.category === 'other' ? 'selected' : '' %>>Other</option>
+            </select>
+          </div>
+
+          <!-- Campus Location Filter -->
+          <div class="col-lg-2 col-md-4">
+            <label class="form-label small text-muted">Location</label>
+            <select name="location" class="form-select" onchange="this.form.submit()">
+              <option value="">All Campus Locations</option>
+              <option value="Main Library" <%= currentFilters.location === 'Main Library' ? 'selected' : '' %>>Main Library</option>
+              <option value="Science Block" <%= currentFilters.location === 'Science Block' ? 'selected' : '' %>>Science Block</option>
+              <option value="Engineering Quad" <%= currentFilters.location === 'Engineering Quad' ? 'selected' : '' %>>Engineering Quad</option>
+              <option value="Central Cafeteria" <%= currentFilters.location === 'Central Cafeteria' ? 'selected' : '' %>>Central Cafeteria</option>
+              <option value="Student Center" <%= currentFilters.location === 'Student Center' ? 'selected' : '' %>>Student Center</option>
+              <option value="Sports Complex" <%= currentFilters.location === 'Sports Complex' ? 'selected' : '' %>>Sports Complex</option>
+              <option value="Dormitory Hall A" <%= currentFilters.location === 'Dormitory Hall A' ? 'selected' : '' %>>Dormitory Hall A</option>
+            </select>
+          </div>
+
+          <!-- Status & Sort Filter -->
+          <div class="col-lg-2 col-md-4">
+            <label class="form-label small text-muted">Status</label>
+            <select name="status" class="form-select" onchange="this.form.submit()">
+              <option value="" <%= !currentFilters.status ? 'selected' : '' %>>All Statuses</option>
+              <option value="open" <%= currentFilters.status === 'open' ? 'selected' : '' %>>Open</option>
+              <option value="under_review" <%= currentFilters.status === 'under_review' ? 'selected' : '' %>>Under Review</option>
+              <option value="claimed" <%= currentFilters.status === 'claimed' ? 'selected' : '' %>>Claimed</option>
+              <option value="returned" <%= currentFilters.status === 'returned' ? 'selected' : '' %>>Returned</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-2 small text-muted">
+            <span>Showing <strong><%= items.length %></strong> of <strong><%= pagination.totalItems %></strong> items</span>
+            <% if (currentFilters.search || currentFilters.type || currentFilters.category || currentFilters.location || currentFilters.status) { %>
+              <a href="/items" class="badge bg-secondary-subtle text-secondary text-decoration-none">
+                <i class="bi bi-x-circle me-1"></i> Clear Filters
+              </a>
+            <% } %>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary btn-sm px-4 rounded-pill">
+              <i class="bi bi-funnel me-1"></i> Apply Filters
+            </button>
+            <a href="/items" class="btn btn-outline-secondary btn-sm px-3 rounded-pill">Reset</a>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Items Listing Grid -->
+    <div class="row">
+      <% if (items && items.length > 0) { %>
+        <% items.forEach(item => { %>
+          <%- include('../../partials/item-card', { item: item }) %>
+        <% }); %>
+      <% } else { %>
+        <div class="col-12">
+          <div class="empty-state-box">
+            <div class="empty-state-icon">
+              <i class="bi bi-search"></i>
+            </div>
+            <h4 class="fw-bold">No items found</h4>
+            <p class="text-muted max-w-500 mx-auto">
+              We couldn't find any reports matching your search and filter criteria. Try clearing some filters or searching with different keywords.
+            </p>
+            <div class="d-flex justify-content-center gap-2 mt-3">
+              <a href="/items" class="btn btn-outline-secondary rounded-pill px-4">Clear All Filters</a>
+              <a href="/items/report" class="btn btn-primary rounded-pill px-4">Submit a New Report</a>
+            </div>
+          </div>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Pagination Controls -->
+    <% if (pagination.totalPages > 1) { %>
+      <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+          <li class="page-item <%= pagination.currentPage <= 1 ? 'disabled' : '' %>">
+            <a class="page-link rounded-pill me-2 px-3" href="/items?page=<%= pagination.currentPage - 1 %>">Previous</a>
+          </li>
+
+          <% for (let p = 1; p <= pagination.totalPages; p++) { %>
+            <li class="page-item <%= pagination.currentPage === p ? 'active' : '' %>">
+              <a class="page-link rounded-pill mx-1 px-3" href="/items?page=<%= p %>"><%= p %></a>
+            </li>
+          <% } %>
+
+          <li class="page-item <%= pagination.currentPage >= pagination.totalPages ? 'disabled' : '' %>">
+            <a class="page-link rounded-pill ms-2 px-3" href="/items?page=<%= pagination.currentPage + 1 %>">Next</a>
+          </li>
+        </ul>
+      </nav>
+    <% } %>
+  </div>
+</main>
+
+<%- include('../../partials/claim-modal') %>
+<%- include('../../partials/footer') %>

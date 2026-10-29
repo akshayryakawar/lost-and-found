@@ -1,0 +1,30 @@
+<%- include('../../partials/head', { title: '404 - Page Not Found | Campus Lost & Found' }) %>
+<%- include('../../partials/navbar', { activePage: '' }) %>
+
+<main class="py-5">
+  <div class="container text-center py-5" style="max-width: 600px;">
+    <div class="mb-4">
+      <div class="rounded-circle bg-danger-subtle text-danger d-inline-flex align-items-center justify-content-center" style="width: 88px; height: 88px; font-size: 2.75rem;">
+        <i class="bi bi-compass"></i>
+      </div>
+    </div>
+
+    <h1 class="display-5 fw-bold text-white mb-2">Lost on Campus?</h1>
+    <h2 class="h5 text-muted mb-4">404 - The page or item you are looking for cannot be found.</h2>
+
+    <p class="text-secondary mb-4">
+      The link you followed may be broken, expired, or the item report may have been archived after being safely returned to its owner.
+    </p>
+
+    <div class="d-flex justify-content-center gap-3">
+      <a href="/" class="btn btn-primary rounded-pill px-4 fw-semibold">
+        <i class="bi bi-house-door me-1"></i> Return to Homepage
+      </a>
+      <a href="/items" class="btn btn-outline-secondary rounded-pill px-4">
+        <i class="bi bi-search me-1"></i> Browse Catalog
+      </a>
+    </div>
+  </div>
+</main>
+
+<%- include('../../partials/footer') %>

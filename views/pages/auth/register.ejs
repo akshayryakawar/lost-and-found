@@ -1,0 +1,72 @@
+<%- include('../../partials/head', { title: 'Register Account | Campus Lost & Found' }) %>
+<%- include('../../partials/navbar', { activePage: 'register' }) %>
+
+<main class="py-5">
+  <div class="container" style="max-width: 520px;">
+    <%- include('../../partials/alerts') %>
+
+    <div class="form-card">
+      <div class="text-center mb-4">
+        <div class="brand-icon mx-auto mb-3" style="width: 50px; height: 50px; font-size: 1.5rem;">
+          <i class="bi bi-person-plus"></i>
+        </div>
+        <h2 class="h3 fw-bold mb-1" style="color:#fff;">Create Student Account</h2>
+        <p class="text-muted small">Register to track reports, receive return alerts, and submit claims</p>
+      </div>
+
+      <form action="/auth/register" method="POST" id="registerForm" class="needs-validation" novalidate>
+        <div class="mb-3">
+          <label for="regName" class="form-label">Full Name <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <span class="input-group-text bg-dark-alt text-muted border-end-0"><i class="bi bi-person"></i></span>
+            <input type="text" class="form-control border-start-0 ps-0" id="regName" name="name" placeholder="Alex Chen" required>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="regEmail" class="form-label">University Email <span class="text-danger">*</span></label>
+          <div class="input-group">
+            <span class="input-group-text bg-dark-alt text-muted border-end-0"><i class="bi bi-envelope"></i></span>
+            <input type="email" class="form-control border-start-0 ps-0" id="regEmail" name="email" placeholder="alex.chen@university.edu" required>
+          </div>
+          <div class="form-text small">Please use your valid university student or staff email address.</div>
+        </div>
+
+        <div class="row g-2 mb-3">
+          <div class="col-md-6">
+            <label for="regPassword" class="form-label">Password <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-dark-alt text-muted border-end-0"><i class="bi bi-lock"></i></span>
+              <input type="password" class="form-control border-start-0 ps-0" id="regPassword" name="password" placeholder="At least 6 characters" minlength="6" required>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <label for="regConfirmPassword" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text bg-dark-alt text-muted border-end-0"><i class="bi bi-lock-fill"></i></span>
+              <input type="password" class="form-control border-start-0 ps-0" id="regConfirmPassword" name="confirmPassword" placeholder="Repeat password" minlength="6" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-4 form-check">
+          <input type="checkbox" class="form-check-input" id="termsCheck" required>
+          <label class="form-check-label small text-muted" for="termsCheck">
+            I agree to the <a href="#" class="text-primary text-decoration-none">Campus Lost &amp; Found Honor Code</a> and terms of service.
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow-sm mb-3">
+          Create Account
+        </button>
+
+        <div class="text-center small text-muted">
+          Already registered? 
+          <a href="/auth/login" class="fw-bold text-primary text-decoration-none">Sign In</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<%- include('../../partials/footer') %>

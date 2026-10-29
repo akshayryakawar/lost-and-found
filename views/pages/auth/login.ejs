@@ -1,0 +1,68 @@
+<%- include('../../partials/head', { title: 'Sign In | Campus Lost & Found' }) %>
+<%- include('../../partials/navbar', { activePage: 'login' }) %>
+
+<main class="py-5">
+  <div class="container" style="max-width: 480px;">
+    <%- include('../../partials/alerts') %>
+
+    <div class="form-card">
+      <div class="text-center mb-4">
+        <div class="brand-icon mx-auto mb-3" style="width: 50px; height: 50px; font-size: 1.5rem;">
+          <i class="bi bi-box-seam"></i>
+        </div>
+        <h2 class="h3 fw-bold mb-1" style="color:#fff;">Campus Sign In</h2>
+        <p class="text-muted small">Log in with your university credentials to manage items and claims</p>
+      </div>
+
+      <!-- Quick Demo Login Buttons for Evaluators -->
+      <div class="p-3 bg-dark-alt rounded-3 border mb-4 text-center">
+        <div class="small fw-bold text-secondary mb-2">⚡ Quick Test Credentials:</div>
+        <div class="d-flex justify-content-center gap-2">
+          <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" id="btnDemoStudent">
+            Student Demo
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" id="btnDemoAdmin">
+            Admin Demo
+          </button>
+        </div>
+      </div>
+
+      <form action="/auth/login" method="POST" id="loginForm">
+        <div class="mb-3">
+          <label for="loginEmail" class="form-label">Campus Email Address</label>
+          <div class="input-group">
+            <span class="input-group-text bg-dark-alt text-muted border-end-0"><i class="bi bi-envelope"></i></span>
+            <input type="email" class="form-control border-start-0 ps-0" id="loginEmail" name="email" placeholder="student@university.edu" required autofocus>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center">
+            <label for="loginPassword" class="form-label mb-0">Password</label>
+            <a href="#" class="small text-primary text-decoration-none">Forgot password?</a>
+          </div>
+          <div class="input-group mt-1">
+            <span class="input-group-text bg-dark-alt text-muted border-end-0"><i class="bi bi-lock"></i></span>
+            <input type="password" class="form-control border-start-0 ps-0" id="loginPassword" name="password" placeholder="••••••••" required>
+          </div>
+        </div>
+
+        <div class="mb-4 form-check">
+          <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
+          <label class="form-check-label small text-muted" for="rememberMe">Remember my device</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow-sm mb-3">
+          Sign In to Portal
+        </button>
+
+        <div class="text-center small text-muted">
+          Don't have an account yet? 
+          <a href="/auth/register" class="fw-bold text-primary text-decoration-none">Register as a Student</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<%- include('../../partials/footer') %>

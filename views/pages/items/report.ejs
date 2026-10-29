@@ -1,0 +1,157 @@
+<%- include('../../partials/head', { title: 'Report an Item | Campus Lost & Found' }) %>
+<%- include('../../partials/navbar', { activePage: 'report' }) %>
+
+<main class="py-4">
+  <div class="container" style="max-width: 820px;">
+    <%- include('../../partials/alerts') %>
+
+    <!-- Page Header -->
+    <div class="text-center mb-4">
+      <div class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill fw-bold mb-2">
+        Campus Registry Form
+      </div>
+      <h1 class="h2 fw-bold text-white">Report an Item</h1>
+      <p class="text-muted">
+        Fill out the details below as accurately as possible to facilitate quick recovery or reunion.
+      </p>
+    </div>
+
+    <!-- Live Duplicate Warning Alert (Hidden by default, triggered by JS) -->
+    <div id="duplicateWarningAlert" class="alert alert-warning d-none rounded-3 shadow-sm border-0 d-flex align-items-center gap-3 mb-4" role="alert">
+      <i class="bi bi-exclamation-triangle-fill fs-3 text-warning"></i>
+      <div>
+        <div class="fw-bold">Similar Existing Report Detected!</div>
+        <div class="small">
+          We found a similar entry in our database: <strong id="duplicateMatchTitle">Item</strong>.
+          Please check if your item has already been reported before submitting.
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <form action="/items" method="POST" enctype="multipart/form-data" id="reportItemForm" class="needs-validation" novalidate>
+        <!-- Segmented Type Selector -->
+        <div class="mb-4 text-center">
+          <label class="form-label d-block text-muted small text-uppercase fw-bold mb-2">What are you reporting?</label>
+          <div class="btn-group w-100" role="group" aria-label="Item Type Selector">
+            <input type="radio" class="btn-check" name="type" id="typeLost" value="lost" <%= (typeof selectedType !== 'undefined' && selectedType === 'found') ? '' : 'checked' %>>
+            <label class="btn btn-outline-danger py-2 fw-bold" for="typeLost">
+              <i class="bi bi-search me-1"></i> I Lost an Item
+            </label>
+
+            <input type="radio" class="btn-check" name="type" id="typeFound" value="found" <%= (typeof selectedType !== 'undefined' && selectedType === 'found') ? 'checked' : '' %>>
+            <label class="btn btn-outline-success py-2 fw-bold" for="typeFound">
+              <i class="bi bi-hand-index-thumb me-1"></i> I Found an Item
+            </label>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <!-- Item Title -->
+          <div class="col-12">
+            <label for="reportTitle" class="form-label">
+              Item Title / Name <span class="text-danger">*</span>
+            </label>
+            <input type="text" class="form-control form-control-lg fs-6" id="reportTitle" name="title" placeholder="e.g., Casio FX-991EX Calculator, Black Dell XPS 15, Leather Wallet" required>
+            <div class="invalid-feedback">Please provide a descriptive item title.</div>
+          </div>
+
+          <!-- Category -->
+          <div class="col-md-6">
+            <label for="reportCategory" class="form-label">
+              Category <span class="text-danger">*</span>
+            </label>
+            <select class="form-select" id="reportCategory" name="category" required>
+              <option value="" disabled selected>Select category...</option>
+              <option value="electronics">Electronics (Phones, Laptops, Earbuds, Chargers)</option>
+              <option value="id_cards">Student IDs, Bank Cards, Badges</option>
+              <option value="keys_wallets">Keys, Wallets, Purses</option>
+              <option value="bags_backpacks">Bags, Backpacks, Luggage</option>
+              <option value="books_notes">Books, Notebooks, Courseware</option>
+              <option value="clothing">Clothing, Jackets, Footwear</option>
+              <option value="accessories">Watches, Jewelry, Glasses</option>
+              <option value="sports">Sports &amp; Fitness Equipment</option>
+              <option value="other">Other / Miscellaneous</option>
+            </select>
+            <div class="invalid-feedback">Please select a category.</div>
+          </div>
+
+          <!-- Campus Location -->
+          <div class="col-md-6">
+            <label for="reportLocation" class="form-label">
+              Campus Location <span class="text-danger">*</span>
+            </label>
+            <select class="form-select" id="reportLocation" name="location" required>
+              <option value="" disabled selected>Select campus area...</option>
+              <option value="Main Library">Main Campus Library (Floors 1-4)</option>
+              <option value="Science Block">Science Block / Physics & Chem Labs</option>
+              <option value="Engineering Quad">Engineering Complex (Quad A & B)</option>
+              <option value="Central Cafeteria">Central Cafeteria & Food Court</option>
+              <option value="Student Center">Student Activity Center / Union</option>
+              <option value="Sports Complex">Gym, Pool & Sports Complex</option>
+              <option value="Dormitory Hall A">Dormitory Hall A / Residential Commons</option>
+              <option value="Administration Building">Administration & Registrar Building</option>
+              <option value="Campus Shuttle Stop">Campus Shuttle Stop / Transit Terminal</option>
+            </select>
+            <div class="invalid-feedback">Please select the approximate campus location.</div>
+          </div>
+
+          <!-- Specific Spot Details -->
+          <div class="col-md-6">
+            <label for="reportSpot" class="form-label">Specific Room / Spot (Optional)</label>
+            <input type="text" class="form-control" id="reportSpot" name="spotDetails" placeholder="e.g. 2nd floor silent study table 14, table near vending machine">
+          </div>
+
+          <!-- Date Lost or Found -->
+          <div class="col-md-6">
+            <label for="reportDate" class="form-label">
+              Date Lost / Found <span class="text-danger">*</span>
+            </label>
+            <input type="date" class="form-control" id="reportDate" name="dateLostOrFound" required value="<%= new Date().toISOString().split('T')[0] %>">
+            <div class="invalid-feedback">Please select the date.</div>
+          </div>
+
+          <!-- Description -->
+          <div class="col-12">
+            <label for="reportDescription" class="form-label">
+              Detailed Description <span class="text-danger">*</span>
+            </label>
+            <textarea class="form-control" id="reportDescription" name="description" rows="4" placeholder="Describe the item's color, brand, condition, visible stickers, case type, or unique marks..." required></textarea>
+            <div class="form-text small">
+              <i class="bi bi-shield-check text-success"></i> <strong>Pro Tip:</strong> For security reasons, keep at least one secret detail (such as lock screen wallpaper or inner compartment contents) unmentioned so the owner can prove it during claiming.
+            </div>
+          </div>
+
+          <!-- Image Upload Dropzone -->
+          <div class="col-12">
+            <label class="form-label">Item Photo (Optional but Recommended)</label>
+            <input type="file" id="itemImageInput" name="itemImage" class="d-none" accept="image/png, image/jpeg, image/jpg, image/webp">
+            
+            <div class="upload-dropzone" id="uploadDropzone">
+              <i class="bi bi-cloud-arrow-up display-5 text-primary mb-2"></i>
+              <div class="fw-bold text-white">Click to select photo or drag and drop here</div>
+              <small class="text-muted">PNG, JPG, WEBP up to 5MB</small>
+
+              <!-- Live Preview -->
+              <div class="upload-preview-container" id="uploadPreviewContainer">
+                <img id="uploadPreviewImg" src="" alt="Preview" class="upload-preview-img">
+                <button type="button" class="upload-remove-btn" id="uploadRemoveBtn" title="Remove image">
+                  <i class="bi bi-x"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+          <a href="/items" class="btn btn-outline-secondary rounded-pill px-4">Cancel</a>
+          <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm">
+            <i class="bi bi-check2-circle me-1"></i> Submit Report
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>
+
+<%- include('../../partials/footer') %>

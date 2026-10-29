@@ -1,0 +1,74 @@
+<div class="col-lg-4 col-md-6 mb-4">
+  <div class="item-card">
+    <div class="item-card-image-wrap">
+      <% if (item.imageUrl || item.image_url) { %>
+        <img src="<%= item.imageUrl || item.image_url %>" alt="<%= item.title %>" class="item-card-image" loading="lazy" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'bi bi-box-seam item-card-fallback-icon\'></i>';">
+      <% } else { %>
+        <i class="bi <%= item.type === 'lost' ? 'bi-search' : 'bi-box-seam' %> item-card-fallback-icon"></i>
+      <% } %>
+
+      <!-- Type Badge -->
+      <span class="badge-item-type <%= item.type === 'lost' ? 'badge-lost' : 'badge-found' %>">
+        <i class="bi <%= item.type === 'lost' ? 'bi-exclamation-circle-fill' : 'bi-check-circle-fill' %>"></i>
+        <%= item.type === 'lost' ? 'Lost Item' : 'Found Item' %>
+      </span>
+
+      <!-- Status Badge -->
+      <span class="badge badge-status status-<%= item.status %>" style="position: absolute; top: 12px; right: 12px;">
+        <% if (item.status === 'open') { %>
+          <i class="bi bi-dot"></i> Open
+        <% } else if (item.status === 'under_review') { %>
+          <i class="bi bi-clock-history"></i> Under Review
+        <% } else if (item.status === 'claimed') { %>
+          <i class="bi bi-patch-check"></i> Claimed
+        <% } else if (item.status === 'returned') { %>
+          <i class="bi bi-check2-all"></i> Returned
+        <% } %>
+      </span>
+    </div>
+
+    <div class="item-card-body">
+      <div class="item-card-category">
+        <i class="bi bi-tag-fill me-1"></i><%= (item.category || '').replace(/_/g, ' ') %>
+      </div>
+
+      <h3 class="item-card-title">
+        <a href="/items/<%= item.id || item._id %>"><%= item.title %></a>
+      </h3>
+
+      <p class="item-card-desc"><%= item.description %></p>
+
+      <ul class="item-meta-list">
+        <li>
+          <i class="bi bi-geo-alt-fill" style="color:var(--lost-color);"></i>
+          <span class="text-truncate"><strong style="color:rgba(255,255,255,.55);">Location:</strong> <%= item.location %></span>
+        </li>
+        <li>
+          <i class="bi bi-calendar3" style="color:var(--accent-blue);"></i>
+          <span><strong style="color:rgba(255,255,255,.55);">Date:</strong> <%= new Date(item.dateLostOrFound || item.date_lost_or_found).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></span>
+        </li>
+        <% if (item.reportedBy && item.reportedBy.name) { %>
+          <li>
+            <i class="bi bi-person-fill" style="color:rgba(255,255,255,.3);"></i>
+            <span>Reported by <%= item.reportedBy.name.split(' ')[0] %></span>
+          </li>
+        <% } %>
+      </ul>
+
+      <div class="item-card-footer">
+        <a href="/items/<%= item.id || item._id %>" class="btn btn-outline-primary btn-sm rounded-pill fw-semibold">
+          View Details <i class="bi bi-arrow-right ms-1"></i>
+        </a>
+
+        <% if (item.type === 'found' && (item.status === 'open' || item.status === 'under_review')) { %>
+          <button type="button" class="btn btn-primary btn-sm rounded-pill px-3"
+            data-bs-toggle="modal" data-bs-target="#claimItemModal"
+            data-item-id="<%= item.id || item._id %>"
+            data-item-title="<%= item.title %>">
+            <i class="bi bi-hand-index-thumb me-1"></i> Claim
+          </button>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</div>

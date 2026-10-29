@@ -8,6 +8,7 @@ const sampleUsers = [
     name: 'Alex Chen',
     email: 'alex.chen@university.edu',
     role: 'student',
+    passwordHash: '$2b$10$0LeQpy0RxYFKvKHz/4s6Ju.lcCr8j.wseCMyDknRloRBqbqoSSDqS',
     createdAt: new Date('2026-09-01T08:00:00Z')
   },
   {
@@ -15,6 +16,7 @@ const sampleUsers = [
     name: 'Sarah Jenkins',
     email: 'sarah.j@university.edu',
     role: 'student',
+    passwordHash: '$2b$10$0LeQpy0RxYFKvKHz/4s6Ju.lcCr8j.wseCMyDknRloRBqbqoSSDqS',
     createdAt: new Date('2026-09-15T10:30:00Z')
   },
   {
@@ -22,6 +24,7 @@ const sampleUsers = [
     name: 'Officer Marcus Vance',
     email: 'admin@university.edu',
     role: 'admin',
+    passwordHash: '$2b$10$joUVxHYFJ/Wpcx5N7rAZ4uBbibsSc/Jrwym9bp7todNs.4g6FLgRu',
     createdAt: new Date('2026-08-01T09:00:00Z')
   }
 ];

@@ -107,10 +107,10 @@ INSERT INTO public.profiles (id, name, email, role) VALUES
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.auth_credentials (user_id, email, password_hash) VALUES
-  ('a0000000-0000-0000-0000-000000000001', 'alex.chen@university.edu', '$2a$10$8g4uN3r9y3a2F9J1P5sJ6.H8/lM1U8D9A8b7V6c5X4Z3W2V1U0T.e'),
-  ('a0000000-0000-0000-0000-000000000002', 'sarah.j@university.edu', '$2a$10$8g4uN3r9y3a2F9J1P5sJ6.H8/lM1U8D9A8b7V6c5X4Z3W2V1U0T.e'),
-  ('a0000000-0000-0000-0000-000000000003', 'admin@university.edu', '$2a$10$8g4uN3r9y3a2F9J1P5sJ6.H8/lM1U8D9A8b7V6c5X4Z3W2V1U0T.e')
-ON CONFLICT (email) DO NOTHING;
+  ('a0000000-0000-0000-0000-000000000001', 'alex.chen@university.edu', '$2b$10$0LeQpy0RxYFKvKHz/4s6Ju.lcCr8j.wseCMyDknRloRBqbqoSSDqS'),
+  ('a0000000-0000-0000-0000-000000000002', 'sarah.j@university.edu', '$2b$10$0LeQpy0RxYFKvKHz/4s6Ju.lcCr8j.wseCMyDknRloRBqbqoSSDqS'),
+  ('a0000000-0000-0000-0000-000000000003', 'admin@university.edu', '$2b$10$joUVxHYFJ/Wpcx5N7rAZ4uBbibsSc/Jrwym9bp7todNs.4g6FLgRu')
+ON CONFLICT (email) DO UPDATE SET password_hash = EXCLUDED.password_hash;
 
 INSERT INTO public.items (id, title, description, type, category, location, date_lost_or_found, image_url, reported_by, status) VALUES
   ('b0000000-0000-0000-0000-000000000001', 'Apple AirPods Pro (2nd Gen) with White Case', 'Found on 2nd floor silent study area near desk 14.', 'found', 'electronics', 'Main Library', NOW() - INTERVAL '2 days', 'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&w=800&q=80', 'a0000000-0000-0000-0000-000000000002', 'open'),

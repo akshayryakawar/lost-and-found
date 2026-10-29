@@ -19,6 +19,13 @@ const { validateItemReport, validateClaim } = require('./middleware/validation')
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const isProduction = process.env.NODE_ENV === 'production';
+
+if (isProduction && !process.env.SESSION_SECRET) {
+  throw new Error('SESSION_SECRET is required when NODE_ENV is production.');
+}
+
+app.locals.assetVersion = Date.now();
 
 // Configure Multer for in-memory file handling before upload to Supabase Storage
 const upload = multer({
@@ -36,8 +43,17 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 // Static Assets
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), {
+  etag: true,
+  maxAge: isProduction ? undefined : 0
+}));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Rendered pages should always revalidate so users receive current templates.
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-cache');
+  next();
+});
 
 // Body Parsing Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -62,26 +78,30 @@ app.use(flash());
 
 // Global template variables middleware
 app.use(async (req, res, next) => {
-  res.locals.currentUser = req.session.user || null;
-  res.locals.isSupabaseActive = isSupabaseConfigured();
-
-  if (req.session.user) {
-    const userId = req.session.user.id || req.session.user._id;
-    const notifs = await dbService.getNotifications(userId);
-    res.locals.unreadCount = notifs.filter(n => !n.isRead).length;
-  } else {
+  try {
+    res.locals.currentUser = req.session.user || null;
+    res.locals.isSupabaseActive = isSupabaseConfigured();
     res.locals.unreadCount = 0;
+
+    if (req.session.user) {
+      const userId = req.session.user.id || req.session.user._id;
+      const notifs = await dbService.getNotifications(userId);
+      res.locals.unreadCount = notifs.filter(n => !n.isRead).length;
+    }
+
+    const successFlash = req.flash('success_msg');
+    const errorFlash = req.flash('error_msg');
+    const infoFlash = req.flash('info_msg');
+
+    res.locals.success_msg = (successFlash && successFlash.length > 0) ? successFlash.join(' ') : (req.query.success || '');
+    res.locals.error_msg = (errorFlash && errorFlash.length > 0) ? errorFlash.join(' ') : (req.query.error || '');
+    res.locals.info_msg = (infoFlash && infoFlash.length > 0) ? infoFlash.join(' ') : (req.query.info || '');
+    next();
+  } catch (err) {
+    console.error('Global template variables middleware error:', err);
+    res.locals.unreadCount = 0;
+    next();
   }
-
-  const successFlash = req.flash('success_msg');
-  const errorFlash = req.flash('error_msg');
-  const infoFlash = req.flash('info_msg');
-
-  res.locals.success_msg = (successFlash && successFlash.length > 0) ? successFlash.join(' ') : (req.query.success || '');
-  res.locals.error_msg = (errorFlash && errorFlash.length > 0) ? errorFlash.join(' ') : (req.query.error || '');
-  res.locals.info_msg = (infoFlash && infoFlash.length > 0) ? infoFlash.join(' ') : (req.query.info || '');
-
-  next();
 });
 
 // ==========================================
@@ -116,6 +136,15 @@ app.get('/', async (req, res) => {
 app.get('/items', async (req, res) => {
   const { search, type, category, location, status, page } = req.query;
   const currentPage = parseInt(page, 10) || 1;
+  const filters = { search, type, category, location, status };
+  const buildPageUrl = (pageNumber) => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) params.set(key, value);
+    });
+    params.set('page', pageNumber);
+    return `/items?${params.toString()}`;
+  };
 
   try {
     const result = await dbService.getItems({
@@ -131,7 +160,8 @@ app.get('/items', async (req, res) => {
     res.render('pages/items/index', {
       title: 'Browse Items',
       items: result.items,
-      currentFilters: { search, type, category, location, status },
+      currentFilters: filters,
+      buildPageUrl,
       pagination: {
         currentPage: result.currentPage,
         totalPages: result.totalPages,

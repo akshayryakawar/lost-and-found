@@ -36,11 +36,6 @@ exports.postLogin = async (req, res) => {
       isMatch = await bcrypt.compare(password, user.passwordHash);
     }
 
-    // Allow demo convenience fallback
-    if (!isMatch && (password === 'student123' || password === 'admin123')) {
-      isMatch = true;
-    }
-
     if (!isMatch) {
       req.flash('error_msg', 'Invalid password. Please check your credentials.');
       return res.redirect(`/auth/login${redirectUrl ? '?redirect=' + encodeURIComponent(redirectUrl) : ''}`);

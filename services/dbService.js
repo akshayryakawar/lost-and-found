@@ -6,15 +6,27 @@
 const { supabase, isSupabaseConfigured } = require('../config/supabase');
 const { sampleUsers, sampleItems, sampleClaims, sampleNotifications } = require('../config/sampleData');
 
+const toPublicUser = ({ passwordHash, ...user }) => user;
+
 // In-Memory state for local fallback mode
-let memoryProfiles = [...sampleUsers];
+let memoryProfiles = sampleUsers.map(toPublicUser);
 let memoryAuth = sampleUsers.map(u => ({
   user_id: u._id,
   email: u.email,
-  password_hash: '$2a$10$8g4uN3r9y3a2F9J1P5sJ6.H8/lM1U8D9A8b7V6c5X4Z3W2V1U0T.e'
+  password_hash: u.passwordHash
 }));
-let memoryItems = [...sampleItems];
-let memoryClaims = [...sampleClaims];
+let memoryItems = sampleItems.map(item => ({
+  ...item,
+  reportedBy: item.reportedBy ? toPublicUser(item.reportedBy) : null
+}));
+let memoryClaims = sampleClaims.map(claim => ({
+  ...claim,
+  claimedBy: claim.claimedBy ? toPublicUser(claim.claimedBy) : null,
+  item: claim.item ? {
+    ...claim.item,
+    reportedBy: claim.item.reportedBy ? toPublicUser(claim.item.reportedBy) : null
+  } : null
+}));
 let memoryNotifications = [...sampleNotifications];
 
 const dbService = {
@@ -69,7 +81,7 @@ const dbService = {
         name: user.name,
         email: user.email,
         role: user.role,
-        passwordHash: auth ? auth.password_hash : '$2a$10$8g4uN3r9y3a2F9J1P5sJ6.H8/lM1U8D9A8b7V6c5X4Z3W2V1U0T.e',
+        passwordHash: auth ? auth.password_hash : null,
         createdAt: user.createdAt
       };
     }

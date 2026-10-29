@@ -148,17 +148,17 @@
       <nav aria-label="Page navigation" class="mt-5">
         <ul class="pagination justify-content-center gap-2">
           <li class="page-item <%= pagination.currentPage <= 1 ? 'disabled' : '' %>">
-            <a class="btn-pill-ghost btn-sm rounded-pill px-3 text-decoration-none" href="/items?page=<%= pagination.currentPage - 1 %>">Previous</a>
+            <a class="btn-pill-ghost btn-sm rounded-pill px-3 text-decoration-none" href="<%= buildPageUrl(pagination.currentPage - 1) %>">Previous</a>
           </li>
 
           <% for (let p = 1; p <= pagination.totalPages; p++) { %>
             <li class="page-item <%= pagination.currentPage === p ? 'active' : '' %>">
-              <a class="btn-pill-ghost btn-sm rounded-pill px-3 text-decoration-none" style="<%= pagination.currentPage === p ? 'background: #ffffff; color: #000000 !important; font-weight: 700;' : '' %>" href="/items?page=<%= p %>"><%= p %></a>
+              <a class="btn-pill-ghost btn-sm rounded-pill px-3 text-decoration-none" style="<%= pagination.currentPage === p ? 'background: #ffffff; color: #000000 !important; font-weight: 700;' : '' %>" href="<%= buildPageUrl(p) %>"><%= p %></a>
             </li>
           <% } %>
 
           <li class="page-item <%= pagination.currentPage >= pagination.totalPages ? 'disabled' : '' %>">
-            <a class="btn-pill-ghost btn-sm rounded-pill px-3 text-decoration-none" href="/items?page=<%= pagination.currentPage + 1 %>">Next</a>
+            <a class="btn-pill-ghost btn-sm rounded-pill px-3 text-decoration-none" href="<%= buildPageUrl(pagination.currentPage + 1) %>">Next</a>
           </li>
         </ul>
       </nav>

@@ -2,9 +2,9 @@
 
 INSERT INTO public.users (id, name, email, password_hash, role)
 VALUES 
-  ('a0000000-0000-0000-0000-000000000001', 'Alex Chen', 'alex.chen@university.edu', '$2a$10$8g4uN3r9y3a2F9J1P5sJ6.H8/lM1U8D9A8b7V6c5X4Z3W2V1U0T.e', 'student'),
-  ('a0000000-0000-0000-0000-000000000002', 'Sarah Jenkins', 'sarah.j@university.edu', '$2a$10$8g4uN3r9y3a2F9J1P5sJ6.H8/lM1U8D9A8b7V6c5X4Z3W2V1U0T.e', 'student'),
-  ('a0000000-0000-0000-0000-000000000003', 'Officer Marcus Vance', 'admin@university.edu', '$2a$10$8g4uN3r9y3a2F9J1P5sJ6.H8/lM1U8D9A8b7V6c5X4Z3W2V1U0T.e', 'admin')
+  ('a0000000-0000-0000-0000-000000000001', 'Alex Chen', 'alex.chen@university.edu', '$2b$10$0LeQpy0RxYFKvKHz/4s6Ju.lcCr8j.wseCMyDknRloRBqbqoSSDqS', 'student'),
+  ('a0000000-0000-0000-0000-000000000002', 'Sarah Jenkins', 'sarah.j@university.edu', '$2b$10$0LeQpy0RxYFKvKHz/4s6Ju.lcCr8j.wseCMyDknRloRBqbqoSSDqS', 'student'),
+  ('a0000000-0000-0000-0000-000000000003', 'Officer Marcus Vance', 'admin@university.edu', '$2b$10$joUVxHYFJ/Wpcx5N7rAZ4uBbibsSc/Jrwym9bp7todNs.4g6FLgRu', 'admin')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.items (id, title, description, type, category, location, date_lost_or_found, image_url, reported_by, status)

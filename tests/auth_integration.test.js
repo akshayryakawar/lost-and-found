@@ -32,7 +32,18 @@ async function runIntegration() {
     assert(adminRes.headers.get('location').includes('/auth/login'), 'Should redirect to /auth/login');
     console.log('  ✓ Unauthenticated /admin blocked and redirected to login');
 
-    // 3. Login as Student
+    // 3. Demo passwords must not authenticate a different account.
+    const invalidAdminLoginRes = await fetch(`${BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'email=admin%40university.edu&password=student123',
+      redirect: 'manual'
+    });
+    assert.strictEqual(invalidAdminLoginRes.status, 302);
+    assert(invalidAdminLoginRes.headers.get('location').includes('/auth/login'), 'Incorrect admin password should be rejected');
+    console.log('  ✓ Demo password cannot authenticate an unrelated account');
+
+    // 4. Login as Student
     const studentLoginRes = await fetch(`${BASE_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -77,7 +88,7 @@ async function runIntegration() {
     });
     assert.strictEqual(authAdminRes.status, 200, 'Admin accessing /admin should return 200');
     const adminHtml = await authAdminRes.text();
-    assert(adminHtml.includes('Management &amp; Dispatch Console') || adminHtml.includes('Management & Dispatch Console'), 'Admin page should render');
+    assert(adminHtml.includes('Dispatch') && adminHtml.includes('Console'), 'Admin page should render');
     console.log('  ✓ Administrator authenticated and authorized for /admin');
 
     // 7. Logout

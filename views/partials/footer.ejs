@@ -35,9 +35,11 @@
         <ul class="footer-links">
           <li><a href="/items/report?type=lost">Report Lost Property</a></li>
           <li><a href="/items/report?type=found">Report Found Item</a></li>
-          <li><a href="#howItWorks">How Claiming Works</a></li>
+          <li><a href="/#howItWorks">How Claiming Works</a></li>
           <li><a href="/auth/login">Student Login</a></li>
-          <li><a href="/admin">Security Console</a></li>
+          <% if (currentUser && currentUser.role === 'admin') { %>
+            <li><a href="/admin">Security Console</a></li>
+          <% } %>
         </ul>
       </div>
 
@@ -80,9 +82,9 @@
 <div id="toastContainer" class="toast-container-campus" aria-live="polite" aria-atomic="true"></div>
 
 <!-- Bootstrap 5.3.3 JS Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script src="/vendor/bootstrap/bootstrap.bundle.min.js"></script>
 
 <!-- Custom App Script -->
-<script src="/js/main.js"></script>
+<script src="/js/main.js?v=<%= assetVersion %>"></script>
 </body>
 </html>

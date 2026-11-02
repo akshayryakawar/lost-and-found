@@ -55,9 +55,9 @@ async function testDbService() {
   console.log('  ✓ createItem added new item');
 
   // 6. Update Status
-  const updatedItem = await dbService.updateItemStatus(createdItem.id, 'claimed');
-  assert.strictEqual(updatedItem.status, 'claimed');
-  console.log('  ✓ updateItemStatus transitioned status to claimed');
+  const updatedItem = await dbService.updateItemStatus(createdItem.id, 'under_review');
+  assert.strictEqual(updatedItem.status, 'under_review');
+  console.log('  ✓ updateItemStatus transitioned status to under_review');
 
   // 7. Claim workflow
   const claim = await dbService.createClaim({

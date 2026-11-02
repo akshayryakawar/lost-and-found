@@ -158,11 +158,13 @@
                           <% if (claim.status === 'pending') { %>
                             <div class="d-flex justify-content-end gap-2">
                               <form action="/admin/claims/<%= claim.id || claim._id %>/approve" method="POST" class="d-inline">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                 <button type="submit" class="btn-pill-success btn-sm px-3" onclick="return confirm('Approve this claim? Item will be marked under review/ready for collection.')">
                                   <i class="bi bi-check-lg"></i> Approve
                                 </button>
                               </form>
                               <form action="/admin/claims/<%= claim.id || claim._id %>/reject" method="POST" class="d-inline">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                                 <button type="submit" class="btn-pill-danger btn-sm px-3" onclick="return confirm('Reject this claim?')">
                                   <i class="bi bi-x-lg"></i> Reject
                                 </button>
@@ -231,6 +233,7 @@
                       </td>
                       <td class="text-end">
                         <form action="/admin/items/<%= item.id || item._id %>/status" method="POST" class="d-inline-flex gap-2 align-items-center justify-content-end">
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
                           <select name="status" class="form-select form-select-sm" style="width: 140px;">
                             <option value="open" <%= item.status === 'open' ? 'selected' : '' %>>Open</option>
                             <option value="under_review" <%= item.status === 'under_review' ? 'selected' : '' %>>Under Review</option>

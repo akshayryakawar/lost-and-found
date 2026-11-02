@@ -28,6 +28,7 @@
     <!-- Centered Glass Card -->
     <div class="glass-panel p-4 p-md-5">
       <form action="/auth/register" method="POST" id="registerForm" class="needs-validation" novalidate>
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <div class="mb-3">
           <label for="regName" class="form-label text-white">Full Name <span style="color: var(--lost-color);">*</span></label>
           <div class="input-group">

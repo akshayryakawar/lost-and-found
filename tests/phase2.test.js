@@ -151,7 +151,7 @@ async function runTests() {
     validateRegister(req, res, () => { nextCalled = true; });
 
     assert.strictEqual(nextCalled, false);
-    assert(errorMsg.includes('at least 6 characters'));
+    assert(errorMsg.includes('at least 8 characters'));
     assert(errorMsg.includes('do not match'));
   });
 

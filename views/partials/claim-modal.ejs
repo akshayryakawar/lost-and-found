@@ -17,6 +17,7 @@
       </div>
 
       <form action="/claims" method="POST" id="claimForm">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <input type="hidden" name="itemId" id="claimItemId" value="">
         
         <div class="modal-body p-4">

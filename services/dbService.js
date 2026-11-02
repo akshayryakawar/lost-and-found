@@ -95,46 +95,42 @@ const dbService = {
     const normalized = email.trim().toLowerCase();
 
     if (isSupabaseConfigured()) {
-      try {
-        // 1. Create Profile record (NO password in profiles table)
-        const { data: profile, error: profileErr } = await supabase
-          .from('profiles')
-          .insert({
-            name: name.trim(),
-            email: normalized,
-            role
-          })
-          .select()
-          .single();
+      // 1. Create Profile record (NO password in profiles table)
+      const { data: profile, error: profileErr } = await supabase
+        .from('profiles')
+        .insert({
+          name: name.trim(),
+          email: normalized,
+          role
+        })
+        .select()
+        .single();
 
-        if (profileErr) throw new Error(profileErr.message);
+      if (profileErr) throw new Error(`Database error creating profile: ${profileErr.message}`);
 
-        // 2. Create Auth Credentials record linked by user_id
-        const { error: authErr } = await supabase
-          .from('auth_credentials')
-          .insert({
-            user_id: profile.id,
-            email: normalized,
-            password_hash: passwordHash
-          });
+      // 2. Create Auth Credentials record linked by user_id
+      const { error: authErr } = await supabase
+        .from('auth_credentials')
+        .insert({
+          user_id: profile.id,
+          email: normalized,
+          password_hash: passwordHash
+        });
 
-        if (authErr) {
-          // Rollback profile if auth creation fails
-          await supabase.from('profiles').delete().eq('id', profile.id);
-          throw new Error(authErr.message);
-        }
-
-        return {
-          id: profile.id,
-          _id: profile.id,
-          name: profile.name,
-          email: profile.email,
-          role: profile.role,
-          createdAt: profile.created_at
-        };
-      } catch (err) {
-        console.warn('[Supabase createUser fallback]', err.message);
+      if (authErr) {
+        // Rollback profile if auth creation fails
+        await supabase.from('profiles').delete().eq('id', profile.id);
+        throw new Error(`Database error saving credentials: ${authErr.message}`);
       }
+
+      return {
+        id: profile.id,
+        _id: profile.id,
+        name: profile.name,
+        email: profile.email,
+        role: profile.role,
+        createdAt: profile.created_at
+      };
     }
 
     // Fallback mode
@@ -313,46 +309,43 @@ const dbService = {
 
   async createItem(itemData) {
     if (isSupabaseConfigured()) {
-      try {
-        const reporterId = itemData.reportedBy ? (itemData.reportedBy.id || itemData.reportedBy._id) : null;
+      const reporterId = itemData.reportedBy ? (itemData.reportedBy.id || itemData.reportedBy._id) : null;
 
-        const { data, error } = await supabase
-          .from('items')
-          .insert({
-            title: itemData.title,
-            description: itemData.description,
-            type: itemData.type,
-            category: itemData.category,
-            location: itemData.location,
-            date_lost_or_found: itemData.dateLostOrFound || new Date(),
-            image_url: itemData.imageUrl || null,
-            reported_by: reporterId,
-            status: itemData.status || 'open'
-          })
-          .select()
-          .single();
+      const { data, error } = await supabase
+        .from('items')
+        .insert({
+          title: itemData.title,
+          description: itemData.description,
+          type: itemData.type,
+          category: itemData.category,
+          location: itemData.location,
+          date_lost_or_found: itemData.dateLostOrFound || new Date(),
+          image_url: itemData.imageUrl || null,
+          reported_by: reporterId,
+          status: itemData.status || 'open'
+        })
+        .select()
+        .single();
 
-        if (!error && data) {
-          return {
-            id: data.id,
-            _id: data.id,
-            title: data.title,
-            description: data.description,
-            type: data.type,
-            category: data.category,
-            location: data.location,
-            dateLostOrFound: data.date_lost_or_found,
-            imageUrl: data.image_url,
-            status: data.status,
-            reportedBy: itemData.reportedBy,
-            createdAt: data.created_at
-          };
-        }
-      } catch (err) {
-        console.warn('[Supabase createItem fallback]', err.message);
-      }
+      if (error) throw new Error(`Database error: ${error.message}`);
+
+      return {
+        id: data.id,
+        _id: data.id,
+        title: data.title,
+        description: data.description,
+        type: data.type,
+        category: data.category,
+        location: data.location,
+        dateLostOrFound: data.date_lost_or_found,
+        imageUrl: data.image_url,
+        status: data.status,
+        reportedBy: itemData.reportedBy,
+        createdAt: data.created_at
+      };
     }
 
+    // Only reach memory fallback when Supabase is NOT configured
     const newItem = {
       id: 'item_' + Date.now().toString().slice(-4),
       _id: 'item_' + Date.now().toString().slice(-4),
@@ -366,10 +359,13 @@ const dbService = {
 
   async updateItemStatus(id, newStatus) {
     if (isSupabaseConfigured()) {
-      await supabase
+      const { error } = await supabase
         .from('items')
         .update({ status: newStatus })
         .eq('id', id);
+
+      if (error) throw new Error(`Database error updating item status: ${error.message}`);
+      return { id, _id: id, status: newStatus };
     }
 
     const item = memoryItems.find(i => i._id === id || i.id === id);
@@ -437,42 +433,79 @@ const dbService = {
   },
 
   async createClaim({ itemId, claimedBy, message, proofDescription }) {
+    const claimantId = claimedBy.id || claimedBy._id || claimedBy;
+
     if (isSupabaseConfigured()) {
-      try {
-        const claimantId = claimedBy.id || claimedBy._id || claimedBy;
-        const { data, error } = await supabase
-          .from('claims')
-          .insert({
-            item_id: itemId,
-            claimed_by: claimantId,
-            message: message || '',
-            proof_description: proofDescription,
-            status: 'pending'
-          })
-          .select()
-          .single();
+      // 1. Check item availability
+      const { data: itemData, error: itemErr } = await supabase
+        .from('items')
+        .select('id, status, title')
+        .eq('id', itemId)
+        .maybeSingle();
 
-        if (!error && data) {
-          await supabase.from('items').update({ status: 'under_review' }).eq('id', itemId);
-
-          return {
-            id: data.id,
-            _id: data.id,
-            itemId: data.item_id,
-            claimedBy,
-            message: data.message,
-            proofDescription: data.proof_description,
-            status: data.status,
-            createdAt: data.created_at
-          };
-        }
-      } catch (err) {
-        console.warn('[Supabase createClaim fallback]', err.message);
+      if (itemErr) throw new Error(`Database error fetching item: ${itemErr.message}`);
+      if (!itemData) throw new Error('Item not found.');
+      if (itemData.status === 'claimed' || itemData.status === 'returned') {
+        throw new Error('This item is no longer available for claims.');
       }
+
+      // 2. Check for duplicate claim by same user
+      const { data: existingClaims, error: checkErr } = await supabase
+        .from('claims')
+        .select('id')
+        .eq('item_id', itemId)
+        .eq('claimed_by', claimantId);
+
+      if (checkErr) throw new Error(`Database error checking duplicate claim: ${checkErr.message}`);
+      if (existingClaims && existingClaims.length > 0) {
+        throw new Error('You have already submitted a claim for this item.');
+      }
+
+      // 3. Insert claim
+      const { data, error } = await supabase
+        .from('claims')
+        .insert({
+          item_id: itemId,
+          claimed_by: claimantId,
+          message: message || '',
+          proof_description: proofDescription,
+          status: 'pending'
+        })
+        .select()
+        .single();
+
+      if (error) throw new Error(`Database error submitting claim: ${error.message}`);
+
+      await supabase.from('items').update({ status: 'under_review' }).eq('id', itemId);
+
+      return {
+        id: data.id,
+        _id: data.id,
+        itemId: data.item_id,
+        claimedBy,
+        message: data.message,
+        proofDescription: data.proof_description,
+        status: data.status,
+        createdAt: data.created_at
+      };
     }
 
+    // Memory fallback mode
     const targetItem = memoryItems.find(i => i._id === itemId || i.id === itemId);
-    if (targetItem) targetItem.status = 'under_review';
+    if (!targetItem) throw new Error('Item not found.');
+    if (targetItem.status === 'claimed' || targetItem.status === 'returned') {
+      throw new Error('This item is no longer available for claims.');
+    }
+
+    const existingClaim = memoryClaims.find(c =>
+      c.itemId === itemId &&
+      c.claimedBy && (c.claimedBy.id === claimantId || c.claimedBy._id === claimantId || c.claimedBy === claimantId)
+    );
+    if (existingClaim) {
+      throw new Error('You have already submitted a claim for this item.');
+    }
+
+    targetItem.status = 'under_review';
 
     const newClaim = {
       id: 'clm_' + Date.now().toString().slice(-4),
@@ -491,28 +524,88 @@ const dbService = {
 
   async updateClaimStatus(claimId, newStatus) {
     if (isSupabaseConfigured()) {
-      try {
-        const { data } = await supabase
-          .from('claims')
-          .update({ status: newStatus })
-          .eq('id', claimId)
-          .select()
-          .single();
+      const { data, error } = await supabase
+        .from('claims')
+        .update({ status: newStatus })
+        .eq('id', claimId)
+        .select(`
+          id, item_id, message, proof_description, status, created_at,
+          profiles:claimed_by (id, name, email, role),
+          items:item_id (id, title)
+        `)
+        .single();
 
-        if (data && newStatus === 'approved') {
-          await supabase.from('items').update({ status: 'claimed' }).eq('id', data.item_id);
+      if (error) throw new Error(`Database error updating claim status: ${error.message}`);
+
+      if (data && newStatus === 'approved') {
+        // Mark item as claimed
+        await supabase.from('items').update({ status: 'claimed' }).eq('id', data.item_id);
+
+        // Reject other pending claims on this item
+        const { data: otherClaims } = await supabase
+          .from('claims')
+          .update({ status: 'rejected' })
+          .eq('item_id', data.item_id)
+          .eq('status', 'pending')
+          .neq('id', claimId)
+          .select('id, claimed_by');
+
+        // Notify other claimants that their claim was rejected
+        if (otherClaims && otherClaims.length > 0) {
+          for (const oc of otherClaims) {
+            await this.createNotification({
+              userId: oc.claimed_by,
+              type: 'claim_status',
+              message: `Your ownership claim was not approved — another claimant's proof was verified.`
+            });
+          }
         }
-      } catch (err) {
-        console.warn('[Supabase updateClaimStatus fallback]', err.message);
       }
+
+      return {
+        id: data.id,
+        _id: data.id,
+        itemId: data.item_id,
+        claimedBy: data.profiles ? {
+          id: data.profiles.id,
+          _id: data.profiles.id,
+          name: data.profiles.name,
+          email: data.profiles.email,
+          role: data.profiles.role
+        } : null,
+        message: data.message,
+        proofDescription: data.proof_description,
+        status: data.status,
+        createdAt: data.created_at
+      };
     }
 
+    // Memory fallback mode
     const claim = memoryClaims.find(c => c._id === claimId || c.id === claimId);
-    if (claim) {
-      claim.status = newStatus;
-      if (newStatus === 'approved') {
-        const item = memoryItems.find(i => i._id === claim.itemId || i.id === claim.itemId);
-        if (item) item.status = 'claimed';
+    if (!claim) throw new Error('Claim not found.');
+
+    claim.status = newStatus;
+    if (newStatus === 'approved') {
+      const item = memoryItems.find(i => i._id === claim.itemId || i.id === claim.itemId);
+      if (item) item.status = 'claimed';
+
+      // Reject all other pending claims on this item and notify users
+      const otherClaims = memoryClaims.filter(c =>
+        c.itemId === claim.itemId &&
+        c.status === 'pending' &&
+        c.id !== claimId && c._id !== claimId
+      );
+
+      for (const oc of otherClaims) {
+        oc.status = 'rejected';
+        const otherClaimantId = oc.claimedBy ? (oc.claimedBy.id || oc.claimedBy._id || oc.claimedBy) : null;
+        if (otherClaimantId) {
+          await this.createNotification({
+            userId: otherClaimantId,
+            type: 'claim_status',
+            message: `Your ownership claim was not approved — another claimant's proof was verified.`
+          });
+        }
       }
     }
     return claim;
@@ -546,7 +639,7 @@ const dbService = {
       }
     }
 
-    return memoryNotifications;
+    return memoryNotifications.filter(n => n.userId === userId);
   },
 
   async createNotification({ userId, message, type = 'system' }) {
@@ -588,7 +681,7 @@ const dbService = {
       }
     }
 
-    memoryNotifications.forEach(n => { n.isRead = true; });
+    memoryNotifications.filter(n => n.userId === userId).forEach(n => { n.isRead = true; });
   },
 
   // ==========================================

@@ -25,13 +25,13 @@ function validateRegister(req, res, next) {
     errors.push('Full name must be at least 2 characters.');
   }
 
-  const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   if (!email || !emailRegex.test(email.trim())) {
     errors.push('Please enter a valid campus email address.');
   }
 
-  if (!password || password.length < 6) {
-    errors.push('Password must be at least 6 characters long.');
+  if (!password || password.length < 8) {
+    errors.push('Password must be at least 8 characters long.');
   }
 
   if (password !== confirmPassword) {

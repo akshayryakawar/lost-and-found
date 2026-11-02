@@ -84,29 +84,46 @@ ALTER TABLE public.items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.claims ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
--- 9. Policies
+-- 9. Policies (service-role only for sensitive tables, anon read for public data)
 DROP POLICY IF EXISTS "Public profiles access" ON public.profiles;
 DROP POLICY IF EXISTS "Service role full profiles" ON public.profiles;
+DROP POLICY IF EXISTS "Anon read profiles" ON public.profiles;
 DROP POLICY IF EXISTS "Service role full auth" ON public.auth_credentials;
 DROP POLICY IF EXISTS "Public items access" ON public.items;
 DROP POLICY IF EXISTS "Service role full items" ON public.items;
+DROP POLICY IF EXISTS "Anon read items" ON public.items;
 DROP POLICY IF EXISTS "Service role full claims" ON public.claims;
 DROP POLICY IF EXISTS "Service role full notifications" ON public.notifications;
+DROP POLICY IF EXISTS "Service role full sessions" ON public.user_sessions;
 
-CREATE POLICY "Public profiles access" ON public.profiles FOR SELECT USING (true);
-CREATE POLICY "Service role full profiles" ON public.profiles FOR ALL USING (true);
-CREATE POLICY "Service role full auth" ON public.auth_credentials FOR ALL USING (true);
-CREATE POLICY "Public items access" ON public.items FOR SELECT USING (true);
-CREATE POLICY "Service role full items" ON public.items FOR ALL USING (true);
-CREATE POLICY "Service role full claims" ON public.claims FOR ALL USING (true);
-CREATE POLICY "Service role full notifications" ON public.notifications FOR ALL USING (true);
+-- auth_credentials: service role only (no anon access)
+CREATE POLICY "Service role full auth" ON public.auth_credentials
+  FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+-- user_sessions: service role only
+CREATE POLICY "Service role full sessions" ON public.user_sessions
+  FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+-- profiles: anon can SELECT, service_role can do ALL
+CREATE POLICY "Anon read profiles" ON public.profiles FOR SELECT TO anon USING (true);
+CREATE POLICY "Service role full profiles" ON public.profiles FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+-- items: anon can SELECT, service_role can do ALL
+CREATE POLICY "Anon read items" ON public.items FOR SELECT TO anon USING (true);
+CREATE POLICY "Service role full items" ON public.items FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+-- claims: service_role only
+CREATE POLICY "Service role full claims" ON public.claims FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+-- notifications: service_role only
+CREATE POLICY "Service role full notifications" ON public.notifications FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- 10. Storage Bucket for item photos
 INSERT INTO storage.buckets (id, name, public) VALUES ('item-images', 'item-images', true) ON CONFLICT (id) DO NOTHING;
 DROP POLICY IF EXISTS "Public Access to Item Images" ON storage.objects;
 DROP POLICY IF EXISTS "Backend Upload Item Images" ON storage.objects;
-CREATE POLICY "Public Access to Item Images" ON storage.objects FOR SELECT USING (bucket_id = 'item-images');
-CREATE POLICY "Backend Upload Item Images" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'item-images');
+CREATE POLICY "Public Access to Item Images" ON storage.objects FOR SELECT TO anon USING (bucket_id = 'item-images');
+CREATE POLICY "Backend Upload Item Images" ON storage.objects FOR INSERT TO service_role WITH CHECK (bucket_id = 'item-images');
 
 -- 11. Initial Demo Accounts (Passwords: student123 / admin123)
 INSERT INTO public.profiles (id, name, email, role) VALUES 

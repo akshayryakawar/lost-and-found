@@ -17,14 +17,18 @@ const SupabaseSessionStore = require('./services/supabaseSessionStore');
 const authRoutes = require('./routes/auth');
 const { ensureAuthenticated, ensureAdmin } = require('./middleware/auth');
 const { validateItemReport, validateClaim } = require('./middleware/validation');
+const csrf = require('csurf');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const isProduction = process.env.NODE_ENV === 'production';
+const COLLECTION_LOCATION = process.env.COLLECTION_LOCATION || 'Student Center Security Desk, Room 102';
 
-if (isProduction && !process.env.SESSION_SECRET) {
-  throw new Error('SESSION_SECRET is required when NODE_ENV is production.');
+if (!process.env.SESSION_SECRET) {
+  throw new Error('SESSION_SECRET environment variable is required.');
 }
+
 if (isProduction && !isSupabaseConfigured()) {
   throw new Error('Supabase credentials are required when NODE_ENV is production.');
 }
@@ -67,7 +71,7 @@ app.use(express.json());
 // Session Middleware
 app.use(session({
   name: 'campus_session_id',
-  secret: process.env.SESSION_SECRET || 'campus_lost_and_found_default_secret_key_2026',
+  secret: process.env.SESSION_SECRET,
   store: isProduction ? new SupabaseSessionStore() : undefined,
   resave: false,
   saveUninitialized: false,
@@ -81,6 +85,33 @@ app.use(session({
 
 // Flash Messages Middleware
 app.use(flash());
+
+// CSRF Protection (uses session, must come after session middleware)
+const csrfProtection = csrf({ cookie: false });
+app.use(csrfProtection);
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
+// CSRF error handler
+app.use((err, req, res, next) => {
+  if (err.code === 'EBADCSRFTOKEN') {
+    req.flash('error_msg', 'Form session expired. Please try again.');
+    return res.redirect('back');
+  }
+  next(err);
+});
+
+// Rate Limiting for Auth Routes
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Too many attempts from this IP, please try again after 15 minutes.'
+});
+app.use('/auth/login', authLimiter);
+app.use('/auth/register', authLimiter);
 
 // Global template variables middleware
 app.use(async (req, res, next) => {
@@ -272,34 +303,48 @@ app.post('/claims', ensureAuthenticated, validateClaim, async (req, res) => {
   try {
     const targetItem = await dbService.getItemById(itemId);
 
-    if (targetItem) {
-      const reporterId = targetItem.reportedBy ? (targetItem.reportedBy.id || targetItem.reportedBy._id) : null;
-      const currentUserId = req.session.user.id || req.session.user._id;
-
-      if (reporterId && reporterId === currentUserId) {
-        req.flash('error_msg', 'You cannot submit an ownership claim on an item you reported yourself.');
-        return res.redirect(`/items/${itemId}`);
-      }
-
-      await dbService.createClaim({
-        itemId,
-        claimedBy: req.session.user,
-        proofDescription,
-        message: message || ''
-      });
-
-      await dbService.createNotification({
-        userId: currentUserId,
-        type: 'claim_status',
-        message: `Your ownership claim for "${targetItem.title}" was submitted to campus security for review.`
-      });
+    if (!targetItem) {
+      req.flash('error_msg', 'Item not found.');
+      return res.redirect('/items');
     }
+
+    if (targetItem.status === 'claimed' || targetItem.status === 'returned') {
+      req.flash('error_msg', 'This item is no longer available for claims.');
+      return res.redirect(`/items/${itemId}`);
+    }
+
+    const reporterId = targetItem.reportedBy ? (targetItem.reportedBy.id || targetItem.reportedBy._id) : null;
+    const currentUserId = req.session.user.id || req.session.user._id;
+
+    if (reporterId && reporterId === currentUserId) {
+      req.flash('error_msg', 'You cannot submit an ownership claim on an item you reported yourself.');
+      return res.redirect(`/items/${itemId}`);
+    }
+
+    const existingClaims = await dbService.getClaims({ itemId, claimedBy: currentUserId });
+    if (existingClaims && existingClaims.length > 0) {
+      req.flash('error_msg', 'You have already submitted a claim for this item.');
+      return res.redirect(`/items/${itemId}`);
+    }
+
+    await dbService.createClaim({
+      itemId,
+      claimedBy: req.session.user,
+      proofDescription,
+      message: message || ''
+    });
+
+    await dbService.createNotification({
+      userId: currentUserId,
+      type: 'claim_status',
+      message: `Your ownership claim for "${targetItem.title}" was submitted to campus security for review.`
+    });
 
     req.flash('success_msg', 'Your ownership claim was submitted for verification!');
     res.redirect('/dashboard');
   } catch (err) {
     console.error('Error creating claim:', err);
-    req.flash('error_msg', 'Failed to submit claim. Please try again.');
+    req.flash('error_msg', err.message || 'Failed to submit claim. Please try again.');
     res.redirect(`/items/${itemId}`);
   }
 });

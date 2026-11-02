@@ -111,7 +111,7 @@
             for (let i = 0; i < 5; i++) {
               if (recentItems && recentItems[i]) {
                 cardsToRender.push({
-                  id: recentItems[i].id || recentItems[i]._id,
+                  id: recentItems[i].id,
                   title: recentItems[i].title,
                   category: (recentItems[i].category || 'Campus Item').replace('_', ' '),
                   colorClass: `fan-card-${i + 1}`,

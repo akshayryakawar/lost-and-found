@@ -6,30 +6,85 @@
 const { supabase, isSupabaseConfigured } = require('../config/supabase');
 const { sampleUsers, sampleItems, sampleClaims, sampleNotifications } = require('../config/sampleData');
 
-const toPublicUser = ({ passwordHash, ...user }) => user;
+let idCounter = 1000;
+const generateId = (prefix) => `${prefix}_${Date.now()}_${(++idCounter).toString(36)}`;
+
+// ==========================================
+// Shared Data Mappers
+// ==========================================
+
+function mapProfile(p) {
+  if (!p) return null;
+  return {
+    id: p.id || p._id,
+    name: p.name,
+    email: p.email,
+    role: p.role,
+    createdAt: p.created_at || p.createdAt
+  };
+}
+
+function mapItem(item) {
+  if (!item) return null;
+  return {
+    id: item.id || item._id,
+    title: item.title,
+    description: item.description,
+    type: item.type,
+    category: item.category,
+    location: item.location,
+    dateLostOrFound: item.date_lost_or_found || item.dateLostOrFound,
+    imageUrl: item.image_url !== undefined ? item.image_url : item.imageUrl,
+    status: item.status,
+    reportedBy: item.profiles ? mapProfile(item.profiles) : (item.reportedBy ? mapProfile(item.reportedBy) : null),
+    createdAt: item.created_at || item.createdAt
+  };
+}
+
+function mapClaim(c) {
+  if (!c) return null;
+  return {
+    id: c.id || c._id,
+    itemId: c.item_id || c.itemId,
+    item: c.items ? mapItem(c.items) : (c.item ? mapItem(c.item) : null),
+    claimedBy: c.profiles ? mapProfile(c.profiles) : (c.claimedBy ? mapProfile(c.claimedBy) : null),
+    proofDescription: c.proof_description !== undefined ? c.proof_description : c.proofDescription,
+    message: c.message || '',
+    status: c.status,
+    createdAt: c.created_at || c.createdAt
+  };
+}
+
+function mapNotification(n) {
+  if (!n) return null;
+  return {
+    id: n.id || n._id,
+    userId: n.user_id || n.userId,
+    type: n.type,
+    message: n.message,
+    isRead: n.is_read !== undefined ? n.is_read : n.isRead,
+    createdAt: n.created_at || n.createdAt
+  };
+}
 
 // In-Memory state for local fallback mode
-let memoryProfiles = sampleUsers.map(toPublicUser);
+let memoryProfiles = sampleUsers.map(u => mapProfile(u));
 let memoryAuth = sampleUsers.map(u => ({
-  user_id: u._id,
+  user_id: u.id || u._id,
   email: u.email,
   password_hash: u.passwordHash
 }));
-let memoryItems = sampleItems.map(item => ({
-  ...item,
-  reportedBy: item.reportedBy ? toPublicUser(item.reportedBy) : null
-}));
-let memoryClaims = sampleClaims.map(claim => ({
-  ...claim,
-  claimedBy: claim.claimedBy ? toPublicUser(claim.claimedBy) : null,
-  item: claim.item ? {
-    ...claim.item,
-    reportedBy: claim.item.reportedBy ? toPublicUser(claim.item.reportedBy) : null
-  } : null
-}));
-let memoryNotifications = [...sampleNotifications];
+let memoryItems = sampleItems.map(item => mapItem(item));
+let memoryClaims = sampleClaims.map(claim => mapClaim(claim));
+let memoryNotifications = sampleNotifications.map(n => mapNotification(n));
 
 const dbService = {
+  // Shared mappers exported for testing/reuse
+  mapProfile,
+  mapItem,
+  mapClaim,
+  mapNotification,
+
   // ==========================================
   // Authentication & Profile Operations
   // ==========================================
@@ -42,7 +97,6 @@ const dbService = {
 
     if (isSupabaseConfigured()) {
       try {
-        // Query credentials joined with profile
         const { data: creds, error } = await supabase
           .from('auth_credentials')
           .select(`
@@ -55,14 +109,10 @@ const dbService = {
         if (error) {
           console.warn('[Supabase Auth Query Notice]', error.message);
         } else if (creds && creds.profiles) {
+          const profile = mapProfile(creds.profiles);
           return {
-            id: creds.profiles.id,
-            _id: creds.profiles.id,
-            name: creds.profiles.name,
-            email: creds.profiles.email,
-            role: creds.profiles.role,
-            passwordHash: creds.password_hash,
-            createdAt: creds.profiles.created_at
+            ...profile,
+            passwordHash: creds.password_hash
           };
         }
       } catch (err) {
@@ -76,13 +126,8 @@ const dbService = {
 
     if (user) {
       return {
-        id: user._id || user.id,
-        _id: user._id || user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        passwordHash: auth ? auth.password_hash : null,
-        createdAt: user.createdAt
+        ...user,
+        passwordHash: auth ? auth.password_hash : null
       };
     }
     return null;
@@ -118,26 +163,17 @@ const dbService = {
         });
 
       if (authErr) {
-        // Rollback profile if auth creation fails
         await supabase.from('profiles').delete().eq('id', profile.id);
         throw new Error(`Database error saving credentials: ${authErr.message}`);
       }
 
-      return {
-        id: profile.id,
-        _id: profile.id,
-        name: profile.name,
-        email: profile.email,
-        role: profile.role,
-        createdAt: profile.created_at
-      };
+      return mapProfile(profile);
     }
 
     // Fallback mode
-    const newId = 'usr_' + Date.now().toString().slice(-4);
+    const newId = generateId('usr');
     const newProfile = {
       id: newId,
-      _id: newId,
       name: name.trim(),
       email: normalized,
       role,
@@ -163,14 +199,7 @@ const dbService = {
         .order('created_at', { ascending: false });
 
       if (!error && data) {
-        return data.map(p => ({
-          id: p.id,
-          _id: p.id,
-          name: p.name,
-          email: p.email,
-          role: p.role,
-          createdAt: p.created_at
-        }));
+        return data.map(mapProfile);
       }
     }
     return memoryProfiles;
@@ -205,26 +234,7 @@ const dbService = {
           .range(from, to);
 
         if (!error && data) {
-          const formattedItems = data.map(item => ({
-            id: item.id,
-            _id: item.id,
-            title: item.title,
-            description: item.description,
-            type: item.type,
-            category: item.category,
-            location: item.location,
-            dateLostOrFound: item.date_lost_or_found,
-            imageUrl: item.image_url,
-            status: item.status,
-            reportedBy: item.profiles ? {
-              id: item.profiles.id,
-              _id: item.profiles.id,
-              name: item.profiles.name,
-              email: item.profiles.email,
-              role: item.profiles.role
-            } : null,
-            createdAt: item.created_at
-          }));
+          const formattedItems = data.map(mapItem);
 
           return {
             items: formattedItems,
@@ -278,38 +288,19 @@ const dbService = {
           .maybeSingle();
 
         if (!error && data) {
-          return {
-            id: data.id,
-            _id: data.id,
-            title: data.title,
-            description: data.description,
-            type: data.type,
-            category: data.category,
-            location: data.location,
-            dateLostOrFound: data.date_lost_or_found,
-            imageUrl: data.image_url,
-            status: data.status,
-            reportedBy: data.profiles ? {
-              id: data.profiles.id,
-              _id: data.profiles.id,
-              name: data.profiles.name,
-              email: data.profiles.email,
-              role: data.profiles.role
-            } : null,
-            createdAt: data.created_at
-          };
+          return mapItem(data);
         }
       } catch (err) {
         console.warn('[Supabase getItemById fallback]', err.message);
       }
     }
 
-    return memoryItems.find(i => i._id === id || i.id === id) || null;
+    return memoryItems.find(i => i.id === id) || null;
   },
 
   async createItem(itemData) {
     if (isSupabaseConfigured()) {
-      const reporterId = itemData.reportedBy ? (itemData.reportedBy.id || itemData.reportedBy._id) : null;
+      const reporterId = itemData.reportedBy ? (itemData.reportedBy.id || itemData.reportedBy) : null;
 
       const { data, error } = await supabase
         .from('items')
@@ -324,32 +315,21 @@ const dbService = {
           reported_by: reporterId,
           status: itemData.status || 'open'
         })
-        .select()
+        .select(`
+          id, title, description, type, category, location, date_lost_or_found, image_url, status, created_at,
+          profiles:reported_by (id, name, email, role)
+        `)
         .single();
 
       if (error) throw new Error(`Database error: ${error.message}`);
-
-      return {
-        id: data.id,
-        _id: data.id,
-        title: data.title,
-        description: data.description,
-        type: data.type,
-        category: data.category,
-        location: data.location,
-        dateLostOrFound: data.date_lost_or_found,
-        imageUrl: data.image_url,
-        status: data.status,
-        reportedBy: itemData.reportedBy,
-        createdAt: data.created_at
-      };
+      return mapItem(data);
     }
 
     // Only reach memory fallback when Supabase is NOT configured
     const newItem = {
-      id: 'item_' + Date.now().toString().slice(-4),
-      _id: 'item_' + Date.now().toString().slice(-4),
+      id: generateId('item'),
       ...itemData,
+      reportedBy: itemData.reportedBy ? mapProfile(itemData.reportedBy) : null,
       status: itemData.status || 'open',
       createdAt: new Date()
     };
@@ -365,10 +345,10 @@ const dbService = {
         .eq('id', id);
 
       if (error) throw new Error(`Database error updating item status: ${error.message}`);
-      return { id, _id: id, status: newStatus };
+      return { id, status: newStatus };
     }
 
-    const item = memoryItems.find(i => i._id === id || i.id === id);
+    const item = memoryItems.find(i => i.id === id);
     if (item) item.status = newStatus;
     return item;
   },
@@ -395,29 +375,10 @@ const dbService = {
         .single();
 
       if (error) throw new Error(`Database error updating item: ${error.message}`);
-      return {
-        id: data.id,
-        _id: data.id,
-        title: data.title,
-        description: data.description,
-        type: data.type,
-        category: data.category,
-        location: data.location,
-        dateLostOrFound: data.date_lost_or_found,
-        imageUrl: data.image_url,
-        status: data.status,
-        reportedBy: data.profiles ? {
-          id: data.profiles.id,
-          _id: data.profiles.id,
-          name: data.profiles.name,
-          email: data.profiles.email,
-          role: data.profiles.role
-        } : null,
-        createdAt: data.created_at
-      };
+      return mapItem(data);
     }
 
-    const item = memoryItems.find(i => i._id === id || i.id === id);
+    const item = memoryItems.find(i => i.id === id);
     if (!item) throw new Error('Item not found.');
     if (updates.title) item.title = updates.title;
     if (updates.description) item.description = updates.description;
@@ -440,7 +401,7 @@ const dbService = {
       return true;
     }
 
-    const idx = memoryItems.findIndex(i => i._id === id || i.id === id);
+    const idx = memoryItems.findIndex(i => i.id === id);
     if (idx !== -1) {
       memoryItems.splice(idx, 1);
     }
@@ -462,7 +423,7 @@ const dbService = {
       return true;
     }
 
-    const profile = memoryProfiles.find(u => u._id === userId || u.id === userId);
+    const profile = memoryProfiles.find(u => u.id === userId);
     if (profile) {
       profile.role = newRole;
     }
@@ -482,7 +443,7 @@ const dbService = {
       const { error } = await supabase
         .from('password_reset_tokens')
         .insert({
-          user_id: user.id || user._id,
+          user_id: user.id,
           token,
           expires_at: expiresAt.toISOString(),
           used: false
@@ -495,7 +456,7 @@ const dbService = {
 
     if (!global.memoryResetTokens) global.memoryResetTokens = [];
     global.memoryResetTokens.push({
-      userId: user.id || user._id,
+      userId: user.id,
       token,
       expiresAt,
       used: false
@@ -579,31 +540,7 @@ const dbService = {
         const { data, error } = await query.order('created_at', { ascending: false });
 
         if (!error && data) {
-          return data.map(c => ({
-            id: c.id,
-            _id: c.id,
-            itemId: c.item_id,
-            item: c.items ? {
-              id: c.items.id,
-              _id: c.items.id,
-              title: c.items.title,
-              type: c.items.type,
-              category: c.items.category,
-              location: c.items.location,
-              status: c.items.status
-            } : null,
-            claimedBy: c.profiles ? {
-              id: c.profiles.id,
-              _id: c.profiles.id,
-              name: c.profiles.name,
-              email: c.profiles.email,
-              role: c.profiles.role
-            } : null,
-            message: c.message,
-            proofDescription: c.proof_description,
-            status: c.status,
-            createdAt: c.created_at
-          }));
+          return data.map(mapClaim);
         }
       } catch (err) {
         console.warn('[Supabase getClaims fallback]', err.message);
@@ -612,13 +549,13 @@ const dbService = {
 
     let claims = [...memoryClaims];
     if (itemId) claims = claims.filter(c => c.itemId === itemId);
-    if (claimedBy) claims = claims.filter(c => c.claimedBy && (c.claimedBy._id === claimedBy || c.claimedBy.id === claimedBy));
+    if (claimedBy) claims = claims.filter(c => c.claimedBy && c.claimedBy.id === claimedBy);
     if (status) claims = claims.filter(c => c.status === status);
     return claims;
   },
 
   async createClaim({ itemId, claimedBy, message, proofDescription }) {
-    const claimantId = claimedBy.id || claimedBy._id || claimedBy;
+    const claimantId = claimedBy.id || claimedBy;
 
     if (isSupabaseConfigured()) {
       // 1. Check item availability
@@ -656,27 +593,21 @@ const dbService = {
           proof_description: proofDescription,
           status: 'pending'
         })
-        .select()
+        .select(`
+          id, item_id, message, proof_description, status, created_at,
+          items:item_id (id, title, type, category, location, status),
+          profiles:claimed_by (id, name, email, role)
+        `)
         .single();
 
       if (error) throw new Error(`Database error submitting claim: ${error.message}`);
 
       await supabase.from('items').update({ status: 'under_review' }).eq('id', itemId);
-
-      return {
-        id: data.id,
-        _id: data.id,
-        itemId: data.item_id,
-        claimedBy,
-        message: data.message,
-        proofDescription: data.proof_description,
-        status: data.status,
-        createdAt: data.created_at
-      };
+      return mapClaim(data);
     }
 
     // Memory fallback mode
-    const targetItem = memoryItems.find(i => i._id === itemId || i.id === itemId);
+    const targetItem = memoryItems.find(i => i.id === itemId);
     if (!targetItem) throw new Error('Item not found.');
     if (targetItem.status === 'claimed' || targetItem.status === 'returned') {
       throw new Error('This item is no longer available for claims.');
@@ -684,7 +615,7 @@ const dbService = {
 
     const existingClaim = memoryClaims.find(c =>
       c.itemId === itemId &&
-      c.claimedBy && (c.claimedBy.id === claimantId || c.claimedBy._id === claimantId || c.claimedBy === claimantId)
+      c.claimedBy && (c.claimedBy.id === claimantId || c.claimedBy === claimantId)
     );
     if (existingClaim) {
       throw new Error('You have already submitted a claim for this item.');
@@ -693,11 +624,10 @@ const dbService = {
     targetItem.status = 'under_review';
 
     const newClaim = {
-      id: 'clm_' + Date.now().toString().slice(-4),
-      _id: 'clm_' + Date.now().toString().slice(-4),
+      id: generateId('clm'),
       itemId,
       item: targetItem,
-      claimedBy,
+      claimedBy: mapProfile(claimedBy),
       message,
       proofDescription,
       status: 'pending',
@@ -747,43 +677,28 @@ const dbService = {
         }
       }
 
-      return {
-        id: data.id,
-        _id: data.id,
-        itemId: data.item_id,
-        claimedBy: data.profiles ? {
-          id: data.profiles.id,
-          _id: data.profiles.id,
-          name: data.profiles.name,
-          email: data.profiles.email,
-          role: data.profiles.role
-        } : null,
-        message: data.message,
-        proofDescription: data.proof_description,
-        status: data.status,
-        createdAt: data.created_at
-      };
+      return mapClaim(data);
     }
 
     // Memory fallback mode
-    const claim = memoryClaims.find(c => c._id === claimId || c.id === claimId);
+    const claim = memoryClaims.find(c => c.id === claimId);
     if (!claim) throw new Error('Claim not found.');
 
     claim.status = newStatus;
     if (newStatus === 'approved') {
-      const item = memoryItems.find(i => i._id === claim.itemId || i.id === claim.itemId);
+      const item = memoryItems.find(i => i.id === claim.itemId);
       if (item) item.status = 'claimed';
 
       // Reject all other pending claims on this item and notify users
       const otherClaims = memoryClaims.filter(c =>
         c.itemId === claim.itemId &&
         c.status === 'pending' &&
-        c.id !== claimId && c._id !== claimId
+        c.id !== claimId
       );
 
       for (const oc of otherClaims) {
         oc.status = 'rejected';
-        const otherClaimantId = oc.claimedBy ? (oc.claimedBy.id || oc.claimedBy._id || oc.claimedBy) : null;
+        const otherClaimantId = oc.claimedBy ? (oc.claimedBy.id || oc.claimedBy) : null;
         if (otherClaimantId) {
           await this.createNotification({
             userId: otherClaimantId,
@@ -809,15 +724,7 @@ const dbService = {
           .order('created_at', { ascending: false });
 
         if (!error && data) {
-          return data.map(n => ({
-            id: n.id,
-            _id: n.id,
-            userId: n.user_id,
-            message: n.message,
-            type: n.type,
-            isRead: n.is_read,
-            createdAt: n.created_at
-          }));
+          return data.map(mapNotification);
         }
       } catch (err) {
         console.warn('[Supabase getNotifications fallback]', err.message);
@@ -842,8 +749,7 @@ const dbService = {
     }
 
     const notif = {
-      id: 'notif_' + Date.now().toString().slice(-4),
-      _id: 'notif_' + Date.now().toString().slice(-4),
+      id: generateId('notif'),
       userId,
       message,
       type,

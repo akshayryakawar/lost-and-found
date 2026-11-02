@@ -8,18 +8,21 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const flash = require('connect-flash');
-const multer = require('multer');
+const csrf = require('csurf');
+const rateLimit = require('express-rate-limit');
 
 const { isSupabaseConfigured, testSupabaseConnection } = require('./config/supabase');
 const dbService = require('./services/dbService');
-const { uploadItemImage, MAX_FILE_SIZE } = require('./services/storageService');
 const SupabaseSessionStore = require('./services/supabaseSessionStore');
-const { sendClaimStatusEmail } = require('./services/emailService');
+
+// Route modules & controllers
 const authRoutes = require('./routes/auth');
-const { ensureAuthenticated, ensureAdmin } = require('./middleware/auth');
-const { validateItemReport, validateClaim } = require('./middleware/validation');
-const csrf = require('csurf');
-const rateLimit = require('express-rate-limit');
+const itemRoutes = require('./routes/items');
+const claimRoutes = require('./routes/claims');
+const adminRoutes = require('./routes/admin');
+const notificationRoutes = require('./routes/notifications');
+const dashboardRoutes = require('./routes/dashboard');
+const itemController = require('./controllers/itemController');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,12 +40,6 @@ if (isProduction && !isSupabaseConfigured()) {
 app.locals.assetVersion = Date.now();
 app.set('trust proxy', 1);
 
-// Configure Multer for in-memory file handling before upload to Supabase Storage
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: MAX_FILE_SIZE }
-});
-
 // Test Supabase connectivity on startup if credentials exist
 if (isSupabaseConfigured()) {
   testSupabaseConnection();
@@ -57,7 +54,6 @@ app.use(express.static(path.join(__dirname, 'public'), {
   etag: true,
   maxAge: isProduction ? undefined : 0
 }));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Rendered pages should always revalidate so users receive current templates.
 app.use((req, res, next) => {
@@ -94,6 +90,7 @@ app.use((req, res, next) => {
   res.locals.csrfToken = req.csrfToken();
   next();
 });
+
 // CSRF error handler
 app.use((err, req, res, next) => {
   if (err.code === 'EBADCSRFTOKEN') {
@@ -144,11 +141,6 @@ app.use(async (req, res, next) => {
 });
 
 // ==========================================
-// Authentication Routes (Login, Register, Logout)
-// ==========================================
-app.use('/auth', authRoutes);
-
-// ==========================================
 // Routes: Homepage
 // ==========================================
 app.get('/', async (req, res) => {
@@ -170,467 +162,17 @@ app.get('/', async (req, res) => {
 });
 
 // ==========================================
-// Routes: Items Directory (Search & Filter)
+// Modular Application Routers
 // ==========================================
-app.get('/items', async (req, res) => {
-  const { search, type, category, location, status, page } = req.query;
-  const currentPage = parseInt(page, 10) || 1;
-  const filters = { search, type, category, location, status };
-  const buildPageUrl = (pageNumber) => {
-    const params = new URLSearchParams();
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) params.set(key, value);
-    });
-    params.set('page', pageNumber);
-    return `/items?${params.toString()}`;
-  };
+app.use('/auth', authRoutes);
+app.use('/items', itemRoutes);
+app.use('/claims', claimRoutes);
+app.use('/admin', adminRoutes);
+app.use('/notifications', notificationRoutes);
+app.use('/dashboard', dashboardRoutes);
 
-  try {
-    const result = await dbService.getItems({
-      search,
-      type,
-      category,
-      location,
-      status,
-      page: currentPage,
-      limit: 6
-    });
-
-    res.render('pages/items/index', {
-      title: 'Browse Items',
-      items: result.items,
-      currentFilters: filters,
-      buildPageUrl,
-      pagination: {
-        currentPage: result.currentPage,
-        totalPages: result.totalPages,
-        totalItems: result.totalItems
-      }
-    });
-  } catch (err) {
-    console.error('Error on items directory:', err);
-    res.status(500).render('pages/errors/500', { title: 'Server Error' });
-  }
-});
-
-// ==========================================
-// Routes: Report Item Form (Protected)
-// ==========================================
-app.get('/items/report', ensureAuthenticated, (req, res) => {
-  const selectedType = req.query.type || 'lost';
-  res.render('pages/items/report', {
-    title: 'Report Item',
-    selectedType
-  });
-});
-
-// ==========================================
-// Routes: Similar Items Search API
-// ==========================================
-app.get('/api/items/similar', async (req, res) => {
-  try {
-    const { title = '', category = '', location = '' } = req.query;
-    if (!title || title.trim().length < 3) {
-      return res.json({ matches: [] });
-    }
-
-    const allItems = (await dbService.getItems({ limit: 50 })).items;
-    const titleWords = title.trim().toLowerCase().split(/\s+/).filter(w => w.length > 2);
-
-    const matches = allItems.filter(item => {
-      const itemTitle = (item.title || '').toLowerCase();
-      const wordOverlap = titleWords.some(w => itemTitle.includes(w));
-      const catMatch = category && item.category === category;
-      return wordOverlap || catMatch;
-    }).slice(0, 3).map(item => ({
-      id: item.id || item._id,
-      title: item.title,
-      type: item.type,
-      category: item.category,
-      location: item.location
-    }));
-
-    res.json({ matches });
-  } catch (err) {
-    res.json({ matches: [] });
-  }
-});
-
-// ==========================================
-// Routes: Item Details
-// ==========================================
-app.get('/items/:id', async (req, res) => {
-  try {
-    const item = await dbService.getItemById(req.params.id);
-
-    if (!item) {
-      return res.status(404).render('pages/errors/404', { title: 'Item Not Found' });
-    }
-
-    // Proper potential match cross-referencing: opposite type, same category, and title keyword overlap
-    const itemsList = (await dbService.getItems({ limit: 100 })).items;
-    const titleWords = item.title.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-    const potentialMatch = itemsList.find(other => {
-      const isDifferent = (other.id !== item.id && other._id !== item.id && other.id !== item._id);
-      if (!isDifferent) return false;
-      const isOppositeType = other.type !== item.type;
-      const isSameCategory = other.category === item.category;
-      const otherTitle = (other.title || '').toLowerCase();
-      const hasKeywordOverlap = titleWords.some(w => otherTitle.includes(w));
-      return isOppositeType && isSameCategory && hasKeywordOverlap;
-    });
-
-    res.render('pages/items/show', {
-      title: item.title,
-      item,
-      potentialMatch
-    });
-  } catch (err) {
-    console.error('Error fetching item:', err);
-    res.status(500).render('pages/errors/500', { title: 'Server Error' });
-  }
-});
-
-// Create Item Submission with Image Upload to Supabase Storage
-app.post('/items', ensureAuthenticated, upload.single('itemImage'), validateItemReport, async (req, res) => {
-  const { title, type, category, location, spotDetails, dateLostOrFound, description } = req.body;
-
-  try {
-    let imageUrl = null;
-    if (req.file) {
-      imageUrl = await uploadItemImage(req.file);
-    }
-
-    const newItem = await dbService.createItem({
-      title,
-      type,
-      category,
-      location: spotDetails ? `${location} (${spotDetails})` : location,
-      dateLostOrFound: dateLostOrFound ? new Date(dateLostOrFound) : new Date(),
-      description,
-      imageUrl,
-      reportedBy: req.session.user,
-      status: 'open'
-    });
-
-    const currentUserId = req.session.user.id || req.session.user._id;
-    await dbService.createNotification({
-      userId: currentUserId,
-      type: 'item_status',
-      message: `Your report for "${newItem.title}" has been successfully logged into the campus system.`
-    });
-
-    req.flash('success_msg', 'Item report registered successfully!');
-    res.redirect(`/items/${newItem.id || newItem._id}`);
-  } catch (err) {
-    console.error('Error creating item:', err);
-    req.flash('error_msg', err.message || 'Failed to register item.');
-    res.redirect('/items/report');
-  }
-});
-
-// Edit Item Form (Owner only, open only)
-app.get('/items/:id/edit', ensureAuthenticated, async (req, res) => {
-  try {
-    const item = await dbService.getItemById(req.params.id);
-    if (!item) {
-      return res.status(404).render('pages/errors/404', { title: 'Item Not Found' });
-    }
-    const currentUserId = req.session.user.id || req.session.user._id;
-    const isOwner = item.reportedBy && (item.reportedBy.id === currentUserId || item.reportedBy._id === currentUserId);
-    if (!isOwner || item.status !== 'open') {
-      req.flash('error_msg', 'You can only edit your own open reports.');
-      return res.redirect(`/items/${req.params.id}`);
-    }
-    res.render('pages/items/edit', {
-      title: 'Edit Report',
-      item
-    });
-  } catch (err) {
-    console.error('Error fetching edit report:', err);
-    res.status(500).render('pages/errors/500', { title: 'Server Error' });
-  }
-});
-
-// Update Item Submission (Owner only, open only)
-app.post('/items/:id/edit', ensureAuthenticated, validateItemReport, async (req, res) => {
-  try {
-    const item = await dbService.getItemById(req.params.id);
-    if (!item) {
-      return res.status(404).render('pages/errors/404', { title: 'Item Not Found' });
-    }
-    const currentUserId = req.session.user.id || req.session.user._id;
-    const isOwner = item.reportedBy && (item.reportedBy.id === currentUserId || item.reportedBy._id === currentUserId);
-    if (!isOwner || item.status !== 'open') {
-      req.flash('error_msg', 'You can only edit your own open reports.');
-      return res.redirect(`/items/${req.params.id}`);
-    }
-    const { title, category, location, description, dateLostOrFound } = req.body;
-    await dbService.updateItem(req.params.id, {
-      title,
-      category,
-      location,
-      description,
-      dateLostOrFound: dateLostOrFound ? new Date(dateLostOrFound) : item.dateLostOrFound
-    });
-    req.flash('success_msg', 'Report updated successfully.');
-    res.redirect(`/items/${req.params.id}`);
-  } catch (err) {
-    console.error('Error updating report:', err);
-    req.flash('error_msg', err.message || 'Failed to update report.');
-    res.redirect(`/items/${req.params.id}`);
-  }
-});
-
-// Delete Item Submission (Owner while open, or Admin)
-app.post('/items/:id/delete', ensureAuthenticated, async (req, res) => {
-  try {
-    const item = await dbService.getItemById(req.params.id);
-    if (!item) {
-      return res.status(404).render('pages/errors/404', { title: 'Item Not Found' });
-    }
-    const currentUserId = req.session.user.id || req.session.user._id;
-    const isOwner = item.reportedBy && (item.reportedBy.id === currentUserId || item.reportedBy._id === currentUserId);
-    const isAdmin = req.session.user.role === 'admin';
-    if (!isAdmin && (!isOwner || item.status !== 'open')) {
-      req.flash('error_msg', 'You can only delete your own open reports.');
-      return res.redirect(`/items/${req.params.id}`);
-    }
-    await dbService.deleteItem(req.params.id);
-    req.flash('success_msg', 'Report deleted successfully.');
-    res.redirect('/dashboard');
-  } catch (err) {
-    console.error('Error deleting report:', err);
-    req.flash('error_msg', err.message || 'Failed to delete report.');
-    res.redirect(`/items/${req.params.id}`);
-  }
-});
-
-// ==========================================
-// Routes: Claims Submission (Protected + Validated)
-// ==========================================
-app.post('/claims', ensureAuthenticated, validateClaim, async (req, res) => {
-  const { itemId, proofDescription, message } = req.body;
-
-  try {
-    const targetItem = await dbService.getItemById(itemId);
-
-    if (!targetItem) {
-      req.flash('error_msg', 'Item not found.');
-      return res.redirect('/items');
-    }
-
-    if (targetItem.status === 'claimed' || targetItem.status === 'returned') {
-      req.flash('error_msg', 'This item is no longer available for claims.');
-      return res.redirect(`/items/${itemId}`);
-    }
-
-    const reporterId = targetItem.reportedBy ? (targetItem.reportedBy.id || targetItem.reportedBy._id) : null;
-    const currentUserId = req.session.user.id || req.session.user._id;
-
-    if (reporterId && reporterId === currentUserId) {
-      req.flash('error_msg', 'You cannot submit an ownership claim on an item you reported yourself.');
-      return res.redirect(`/items/${itemId}`);
-    }
-
-    const existingClaims = await dbService.getClaims({ itemId, claimedBy: currentUserId });
-    if (existingClaims && existingClaims.length > 0) {
-      req.flash('error_msg', 'You have already submitted a claim for this item.');
-      return res.redirect(`/items/${itemId}`);
-    }
-
-    await dbService.createClaim({
-      itemId,
-      claimedBy: req.session.user,
-      proofDescription,
-      message: message || ''
-    });
-
-    await dbService.createNotification({
-      userId: currentUserId,
-      type: 'claim_status',
-      message: `Your ownership claim for "${targetItem.title}" was submitted to campus security for review.`
-    });
-
-    req.flash('success_msg', 'Your ownership claim was submitted for verification!');
-    res.redirect('/dashboard');
-  } catch (err) {
-    console.error('Error creating claim:', err);
-    req.flash('error_msg', err.message || 'Failed to submit claim. Please try again.');
-    res.redirect(`/items/${itemId}`);
-  }
-});
-
-// ==========================================
-// Routes: User Dashboard (Protected)
-// ==========================================
-app.get('/dashboard', ensureAuthenticated, async (req, res) => {
-  try {
-    const userId = req.session.user.id || req.session.user._id;
-    const allItems = (await dbService.getItems({ limit: 100 })).items;
-    const myReports = allItems.filter(i => i.reportedBy && (i.reportedBy.id === userId || i.reportedBy._id === userId));
-    const myClaims = await dbService.getClaims({ claimedBy: userId });
-
-    res.render('pages/dashboard/index', {
-      title: 'My Dashboard',
-      myReports,
-      myClaims
-    });
-  } catch (err) {
-    console.error('Dashboard error:', err);
-    res.status(500).render('pages/errors/500', { title: 'Server Error' });
-  }
-});
-
-// ==========================================
-// Routes: Admin Portal (Admin Protected)
-// ==========================================
-app.get('/admin', ensureAdmin, async (req, res) => {
-  try {
-    const [adminStats, itemsRes, claims, profiles] = await Promise.all([
-      dbService.getStats(),
-      dbService.getItems({ limit: 100 }),
-      dbService.getClaims(),
-      dbService.getAllProfiles()
-    ]);
-
-    res.render('pages/admin/index', {
-      title: 'Admin Moderation',
-      adminStats,
-      items: itemsRes.items,
-      claims,
-      users: profiles
-    });
-  } catch (err) {
-    console.error('Admin portal error:', err);
-    res.status(500).render('pages/errors/500', { title: 'Server Error' });
-  }
-});
-
-// Admin Approve Claim (Admin Protected)
-app.post('/admin/claims/:id/approve', ensureAdmin, async (req, res) => {
-  try {
-    const updatedClaim = await dbService.updateClaimStatus(req.params.id, 'approved');
-    if (updatedClaim && updatedClaim.claimedBy) {
-      const claimantId = updatedClaim.claimedBy.id || updatedClaim.claimedBy._id || updatedClaim.claimedBy;
-      await dbService.createNotification({
-        userId: claimantId,
-        type: 'claim_status',
-        message: `Great news! Your ownership claim was approved. Collect your item at ${COLLECTION_LOCATION}.`
-      });
-
-      if (updatedClaim.claimedBy.email) {
-        sendClaimStatusEmail({
-          to: updatedClaim.claimedBy.email,
-          name: updatedClaim.claimedBy.name,
-          itemTitle: (updatedClaim.item && updatedClaim.item.title) || 'Reported Belonging',
-          status: 'approved',
-          collectionLocation: COLLECTION_LOCATION
-        }).catch(() => {});
-      }
-    }
-    req.flash('success_msg', 'Claim approved successfully.');
-  } catch (err) {
-    console.error('Error approving claim:', err);
-    req.flash('error_msg', 'Failed to approve claim.');
-  }
-  res.redirect('/admin');
-});
-
-// Admin Reject Claim (Admin Protected)
-app.post('/admin/claims/:id/reject', ensureAdmin, async (req, res) => {
-  try {
-    const updatedClaim = await dbService.updateClaimStatus(req.params.id, 'rejected');
-    if (updatedClaim && updatedClaim.claimedBy) {
-      const claimantId = updatedClaim.claimedBy.id || updatedClaim.claimedBy._id || updatedClaim.claimedBy;
-      await dbService.createNotification({
-        userId: claimantId,
-        type: 'claim_status',
-        message: `Your ownership claim was not approved due to insufficient verification proof.`
-      });
-
-      if (updatedClaim.claimedBy.email) {
-        sendClaimStatusEmail({
-          to: updatedClaim.claimedBy.email,
-          name: updatedClaim.claimedBy.name,
-          itemTitle: (updatedClaim.item && updatedClaim.item.title) || 'Reported Belonging',
-          status: 'rejected',
-          collectionLocation: COLLECTION_LOCATION
-        }).catch(() => {});
-      }
-    }
-    req.flash('info_msg', 'Claim marked as rejected.');
-  } catch (err) {
-    console.error('Error rejecting claim:', err);
-    req.flash('error_msg', 'Failed to reject claim.');
-  }
-  res.redirect('/admin');
-});
-
-// Admin Update Item Status (Admin Protected)
-app.post('/admin/items/:id/status', ensureAdmin, async (req, res) => {
-  try {
-    await dbService.updateItemStatus(req.params.id, req.body.status);
-    req.flash('success_msg', 'Item status updated successfully.');
-  } catch (err) {
-    console.error('Error updating status:', err);
-    req.flash('error_msg', 'Failed to update item status.');
-  }
-  res.redirect('/admin');
-});
-
-// Admin Delete Item (Admin Protected)
-app.post('/admin/items/:id/delete', ensureAdmin, async (req, res) => {
-  try {
-    await dbService.deleteItem(req.params.id);
-    req.flash('success_msg', 'Item deleted successfully.');
-  } catch (err) {
-    console.error('Error deleting item:', err);
-    req.flash('error_msg', 'Failed to delete item.');
-  }
-  res.redirect('/admin');
-});
-
-// Admin Update User Role (Admin Protected)
-app.post('/admin/users/:id/role', ensureAdmin, async (req, res) => {
-  try {
-    const { role } = req.body;
-    await dbService.updateUserRole(req.params.id, role);
-    req.flash('success_msg', 'User role updated successfully.');
-  } catch (err) {
-    console.error('Error updating user role:', err);
-    req.flash('error_msg', err.message || 'Failed to update user role.');
-  }
-  res.redirect('/admin');
-});
-
-// ==========================================
-// Routes: Notifications (Protected)
-// ==========================================
-app.get('/notifications', ensureAuthenticated, async (req, res) => {
-  try {
-    const userId = req.session.user.id || req.session.user._id;
-    const notifications = await dbService.getNotifications(userId);
-    res.render('pages/notifications/index', {
-      title: 'Notifications',
-      notifications
-    });
-  } catch (err) {
-    console.error('Error fetching notifications:', err);
-    res.status(500).render('pages/errors/500', { title: 'Server Error' });
-  }
-});
-
-app.post('/notifications/mark-read', ensureAuthenticated, async (req, res) => {
-  try {
-    const userId = req.session.user.id || req.session.user._id;
-    await dbService.markNotificationsRead(userId);
-    req.flash('success_msg', 'All notifications marked as read.');
-  } catch (err) {
-    console.error('Error marking notifications:', err);
-  }
-  res.redirect('/notifications');
-});
+// API Routes
+app.get('/api/items/similar', itemController.getSimilarItems);
 
 // 404 Catch-all Handler
 app.use((req, res) => {

@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node tests/phase2.test.js && node tests/dbservice.test.js && node tests/auth_integration.test.js"
+    "test": "node tests/phase2.test.js && node tests/dbservice.test.js && node tests/auth_integration.test.js && node tests/phase4_features.test.js"
   },
   "keywords": [
     "campus",

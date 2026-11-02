@@ -95,6 +95,20 @@ npm run dev
 ### 4. Open in Browser
 Visit **`http://localhost:3000`** in your browser.
 
+## Deploying to Vercel
+
+The root `server.js` exports the Express app, so Vercel detects it automatically; no `vercel.json` or custom build command is needed. Push this repository to GitHub, import it from **Vercel → Add New → Project**, and deploy.
+
+Before deploying:
+1. Create a Supabase project and run only [`supabase/schema.sql`](./supabase/schema.sql) in its SQL Editor. This creates the tables and item image bucket, including the persistent session table.
+2. In Vercel **Project Settings → Environment Variables**, add:
+   - `SUPABASE_URL` — your Supabase project URL.
+   - `SUPABASE_SERVICE_ROLE_KEY` — the project’s service-role key. Keep it server-side; never expose or commit it.
+   - `SESSION_SECRET` — a long random secret, for example generated with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
+3. Redeploy after adding the variables. Vercel sets production mode, and the app requires both a session secret and Supabase credentials there.
+
+When running on Vercel, sessions are stored in Supabase so authentication survives serverless invocations. Local development continues to use the in-memory session store.
+
 ---
 
 ## 🧪 Interactive Features in Phase 1

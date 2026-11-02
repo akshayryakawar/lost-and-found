@@ -13,6 +13,7 @@ const multer = require('multer');
 const { isSupabaseConfigured, testSupabaseConnection } = require('./config/supabase');
 const dbService = require('./services/dbService');
 const { uploadItemImage, MAX_FILE_SIZE } = require('./services/storageService');
+const SupabaseSessionStore = require('./services/supabaseSessionStore');
 const authRoutes = require('./routes/auth');
 const { ensureAuthenticated, ensureAdmin } = require('./middleware/auth');
 const { validateItemReport, validateClaim } = require('./middleware/validation');
@@ -24,8 +25,12 @@ const isProduction = process.env.NODE_ENV === 'production';
 if (isProduction && !process.env.SESSION_SECRET) {
   throw new Error('SESSION_SECRET is required when NODE_ENV is production.');
 }
+if (isProduction && !isSupabaseConfigured()) {
+  throw new Error('Supabase credentials are required when NODE_ENV is production.');
+}
 
 app.locals.assetVersion = Date.now();
+app.set('trust proxy', 1);
 
 // Configure Multer for in-memory file handling before upload to Supabase Storage
 const upload = multer({
@@ -63,6 +68,7 @@ app.use(express.json());
 app.use(session({
   name: 'campus_session_id',
   secret: process.env.SESSION_SECRET || 'campus_lost_and_found_default_secret_key_2026',
+  store: isProduction ? new SupabaseSessionStore() : undefined,
   resave: false,
   saveUninitialized: false,
   cookie: {

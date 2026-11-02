@@ -24,7 +24,15 @@ CREATE TABLE IF NOT EXISTS public.auth_credentials (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 3. Items Table
+-- 3. Persistent server-side sessions for Vercel deployments
+CREATE TABLE IF NOT EXISTS public.user_sessions (
+  sid TEXT PRIMARY KEY,
+  session_data JSONB NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_user_sessions_expires_at ON public.user_sessions (expires_at);
+
+-- 4. Items Table
 CREATE TABLE IF NOT EXISTS public.items (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title TEXT NOT NULL,
@@ -39,7 +47,7 @@ CREATE TABLE IF NOT EXISTS public.items (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 4. Claims Table
+-- 5. Claims Table
 CREATE TABLE IF NOT EXISTS public.claims (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   item_id UUID NOT NULL REFERENCES public.items(id) ON DELETE CASCADE,
@@ -50,7 +58,7 @@ CREATE TABLE IF NOT EXISTS public.claims (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 5. Notifications Table
+-- 6. Notifications Table
 CREATE TABLE IF NOT EXISTS public.notifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -60,7 +68,7 @@ CREATE TABLE IF NOT EXISTS public.notifications (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 6. Indexes
+-- 7. Indexes
 CREATE INDEX IF NOT EXISTS idx_profiles_email ON public.profiles (email);
 CREATE INDEX IF NOT EXISTS idx_auth_credentials_email ON public.auth_credentials (email);
 CREATE INDEX IF NOT EXISTS idx_items_type_category ON public.items (type, category, status);
@@ -68,14 +76,15 @@ CREATE INDEX IF NOT EXISTS idx_items_created_at ON public.items (created_at DESC
 CREATE INDEX IF NOT EXISTS idx_claims_item_claimant ON public.claims (item_id, claimed_by);
 CREATE INDEX IF NOT EXISTS idx_notifications_user_read ON public.notifications (user_id, is_read, created_at DESC);
 
--- 7. Row Level Security (RLS)
+-- 8. Row Level Security (RLS)
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.auth_credentials ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.user_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.claims ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
--- 8. Policies
+-- 9. Policies
 DROP POLICY IF EXISTS "Public profiles access" ON public.profiles;
 DROP POLICY IF EXISTS "Service role full profiles" ON public.profiles;
 DROP POLICY IF EXISTS "Service role full auth" ON public.auth_credentials;
@@ -92,14 +101,14 @@ CREATE POLICY "Service role full items" ON public.items FOR ALL USING (true);
 CREATE POLICY "Service role full claims" ON public.claims FOR ALL USING (true);
 CREATE POLICY "Service role full notifications" ON public.notifications FOR ALL USING (true);
 
--- 9. Storage Bucket for item photos
+-- 10. Storage Bucket for item photos
 INSERT INTO storage.buckets (id, name, public) VALUES ('item-images', 'item-images', true) ON CONFLICT (id) DO NOTHING;
 DROP POLICY IF EXISTS "Public Access to Item Images" ON storage.objects;
 DROP POLICY IF EXISTS "Backend Upload Item Images" ON storage.objects;
 CREATE POLICY "Public Access to Item Images" ON storage.objects FOR SELECT USING (bucket_id = 'item-images');
 CREATE POLICY "Backend Upload Item Images" ON storage.objects FOR INSERT WITH CHECK (bucket_id = 'item-images');
 
--- 10. Initial Demo Accounts (Passwords: student123 / admin123)
+-- 11. Initial Demo Accounts (Passwords: student123 / admin123)
 INSERT INTO public.profiles (id, name, email, role) VALUES 
   ('a0000000-0000-0000-0000-000000000001', 'Alex Chen', 'alex.chen@university.edu', 'student'),
   ('a0000000-0000-0000-0000-000000000002', 'Sarah Jenkins', 'sarah.j@university.edu', 'student'),

@@ -28,37 +28,30 @@ async function uploadItemImage(file) {
   }
 
   if (isSupabaseConfigured()) {
-    try {
-      const ext = path.extname(file.originalname) || '.jpg';
-      const fileName = `items/${Date.now()}-${crypto.randomBytes(6).toString('hex')}${ext}`;
+    const ext = path.extname(file.originalname) || '.jpg';
+    const fileName = `items/${Date.now()}-${crypto.randomBytes(6).toString('hex')}${ext}`;
 
-      const { data, error } = await supabase.storage
-        .from('item-images')
-        .upload(fileName, file.buffer, {
-          contentType: file.mimetype,
-          upsert: false
-        });
+    const { data, error } = await supabase.storage
+      .from('item-images')
+      .upload(fileName, file.buffer, {
+        contentType: file.mimetype,
+        upsert: false
+      });
 
-      if (error) {
-        console.warn('[Supabase Storage Warning]', error.message);
-        // If storage bucket isn't created yet or error, return fallback placeholder
-        return 'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&w=800&q=80';
-      }
-
-      // Retrieve public URL for the uploaded file
-      const { data: urlData } = supabase.storage
-        .from('item-images')
-        .getPublicUrl(fileName);
-
-      return urlData.publicUrl;
-    } catch (err) {
-      console.error('[Storage Error]', err.message);
-      return 'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&w=800&q=80';
+    if (error) {
+      throw new Error(`Storage upload failed: ${error.message}`);
     }
+
+    // Retrieve public URL for the uploaded file
+    const { data: urlData } = supabase.storage
+      .from('item-images')
+      .getPublicUrl(fileName);
+
+    return urlData.publicUrl;
   }
 
-  // Fallback placeholder image when offline/mocking
-  return 'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&w=800&q=80';
+  // Fallback when offline/mocking without Supabase
+  return null;
 }
 
 module.exports = {

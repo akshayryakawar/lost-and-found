@@ -358,7 +358,7 @@
               All high-value items (wallets, laptops, phones, student ID cards) reported as found are securely held in the Central Security Vault at the Student Center.
             </p>
             <div class="d-flex flex-wrap gap-4 small text-muted">
-              <div><i class="bi bi-geo-alt-fill me-2" style="color: var(--accent-pink);"></i> Student Center, Room 102</div>
+              <div><i class="bi bi-geo-alt-fill me-2" style="color: var(--accent-pink);"></i> <%= typeof collectionLocation !== 'undefined' ? collectionLocation : 'Student Center Security Desk, Room 102' %></div>
               <div><i class="bi bi-clock-fill me-2" style="color: var(--accent-cyan);"></i> Mon-Fri 8:00 AM &ndash; 6:00 PM</div>
               <div><i class="bi bi-shield-check me-2" style="color: var(--accent-lime);"></i> Student ID required</div>
             </div>

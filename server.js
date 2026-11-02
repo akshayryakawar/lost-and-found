@@ -118,6 +118,7 @@ app.use(async (req, res, next) => {
   try {
     res.locals.currentUser = req.session.user || null;
     res.locals.isSupabaseActive = isSupabaseConfigured();
+    res.locals.collectionLocation = COLLECTION_LOCATION;
     res.locals.unreadCount = 0;
 
     if (req.session.user) {
@@ -223,6 +224,38 @@ app.get('/items/report', ensureAuthenticated, (req, res) => {
 });
 
 // ==========================================
+// Routes: Similar Items Search API
+// ==========================================
+app.get('/api/items/similar', async (req, res) => {
+  try {
+    const { title = '', category = '', location = '' } = req.query;
+    if (!title || title.trim().length < 3) {
+      return res.json({ matches: [] });
+    }
+
+    const allItems = (await dbService.getItems({ limit: 50 })).items;
+    const titleWords = title.trim().toLowerCase().split(/\s+/).filter(w => w.length > 2);
+
+    const matches = allItems.filter(item => {
+      const itemTitle = (item.title || '').toLowerCase();
+      const wordOverlap = titleWords.some(w => itemTitle.includes(w));
+      const catMatch = category && item.category === category;
+      return wordOverlap || catMatch;
+    }).slice(0, 3).map(item => ({
+      id: item.id || item._id,
+      title: item.title,
+      type: item.type,
+      category: item.category,
+      location: item.location
+    }));
+
+    res.json({ matches });
+  } catch (err) {
+    res.json({ matches: [] });
+  }
+});
+
+// ==========================================
 // Routes: Item Details
 // ==========================================
 app.get('/items/:id', async (req, res) => {
@@ -233,13 +266,18 @@ app.get('/items/:id', async (req, res) => {
       return res.status(404).render('pages/errors/404', { title: 'Item Not Found' });
     }
 
-    // Duplicate match detection simulation
-    const itemsList = (await dbService.getItems({ limit: 20 })).items;
-    const potentialMatch = itemsList.find(other =>
-      (other.id !== item.id && other._id !== item._id) &&
-      other.type !== item.type &&
-      (other.category === item.category || other.title.toLowerCase().includes(item.title.toLowerCase().split(' ')[0]))
-    );
+    // Proper potential match cross-referencing: opposite type, same category, and title keyword overlap
+    const itemsList = (await dbService.getItems({ limit: 100 })).items;
+    const titleWords = item.title.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+    const potentialMatch = itemsList.find(other => {
+      const isDifferent = (other.id !== item.id && other._id !== item.id && other.id !== item._id);
+      if (!isDifferent) return false;
+      const isOppositeType = other.type !== item.type;
+      const isSameCategory = other.category === item.category;
+      const otherTitle = (other.title || '').toLowerCase();
+      const hasKeywordOverlap = titleWords.some(w => otherTitle.includes(w));
+      return isOppositeType && isSameCategory && hasKeywordOverlap;
+    });
 
     res.render('pages/items/show', {
       title: item.title,
@@ -260,10 +298,6 @@ app.post('/items', ensureAuthenticated, upload.single('itemImage'), validateItem
     let imageUrl = null;
     if (req.file) {
       imageUrl = await uploadItemImage(req.file);
-    } else {
-      imageUrl = type === 'lost' 
-        ? 'https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?auto=format&fit=crop&w=800&q=80'
-        : 'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&w=800&q=80';
     }
 
     const newItem = await dbService.createItem({
@@ -404,7 +438,7 @@ app.post('/admin/claims/:id/approve', ensureAdmin, async (req, res) => {
       await dbService.createNotification({
         userId: claimantId,
         type: 'claim_status',
-        message: `Great news! Your ownership claim was approved. Collect your item at Student Center Room 102.`
+        message: `Great news! Your ownership claim was approved. Collect your item at ${COLLECTION_LOCATION}.`
       });
     }
     req.flash('success_msg', 'Claim approved successfully.');

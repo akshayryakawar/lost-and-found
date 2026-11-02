@@ -98,7 +98,7 @@ function initImageUploadPreview() {
 }
 
 /**
- * Real-time Duplicate Report Warning Simulator
+ * Real-time Duplicate Report Warning via API
  */
 function initDuplicateCheck() {
   const titleInput = document.getElementById('reportTitle');
@@ -109,40 +109,41 @@ function initDuplicateCheck() {
 
   if (!titleInput || !duplicateAlert) return;
 
-  const sampleExistingItems = [
-    { title: 'AirPods Pro with White Case', category: 'electronics', location: 'Main Campus Library' },
-    { title: 'Black Leather Fossil Wallet', category: 'keys_wallets', location: 'Central Cafeteria' },
-    { title: 'Casio Scientific Calculator FX-991EX', category: 'electronics', location: 'Engineering Quad' },
-    { title: 'Silver Hydro Flask Water Bottle', category: 'accessories', location: 'Student Center' }
-  ];
-
-  function checkSimilarity() {
-    const enteredTitle = (titleInput.value || '').trim().toLowerCase();
-    const enteredCat = (categoryInput ? categoryInput.value : '').toLowerCase();
-    const enteredLoc = (locationInput ? locationInput.value : '').toLowerCase();
+  async function checkSimilarity() {
+    const enteredTitle = (titleInput.value || '').trim();
+    const enteredCat = (categoryInput ? categoryInput.value : '').trim();
+    const enteredLoc = (locationInput ? locationInput.value : '').trim();
 
     if (enteredTitle.length < 3) {
       duplicateAlert.classList.add('d-none');
       return;
     }
 
-    const match = sampleExistingItems.find(item => {
-      const itemTitleWords = item.title.toLowerCase().split(' ');
-      const hasWordOverlap = itemTitleWords.some(w => w.length > 3 && enteredTitle.includes(w));
-      return hasWordOverlap || (enteredCat && item.category === enteredCat && enteredLoc && item.location.toLowerCase().includes(enteredLoc));
-    });
+    try {
+      const query = new URLSearchParams({
+        title: enteredTitle,
+        category: enteredCat,
+        location: enteredLoc
+      });
+      const res = await fetch(`/api/items/similar?${query.toString()}`);
+      if (!res.ok) throw new Error('API request failed');
+      const data = await res.json();
 
-    if (match) {
-      if (duplicateMatchText) {
-        duplicateMatchText.textContent = `"${match.title}" at ${match.location}`;
+      if (data && data.matches && data.matches.length > 0) {
+        const match = data.matches[0];
+        if (duplicateMatchText) {
+          duplicateMatchText.textContent = `"${match.title}" at ${match.location}`;
+        }
+        duplicateAlert.classList.remove('d-none');
+      } else {
+        duplicateAlert.classList.add('d-none');
       }
-      duplicateAlert.classList.remove('d-none');
-    } else {
+    } catch (err) {
       duplicateAlert.classList.add('d-none');
     }
   }
 
-  titleInput.addEventListener('input', debounce(checkSimilarity, 300));
+  titleInput.addEventListener('input', debounce(checkSimilarity, 400));
   if (categoryInput) categoryInput.addEventListener('change', checkSimilarity);
   if (locationInput) locationInput.addEventListener('change', checkSimilarity);
 }

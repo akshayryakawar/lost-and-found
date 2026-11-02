@@ -60,7 +60,7 @@
             <i class="bi bi-shield-check" style="color: var(--accent-lime);"></i> Campus Custody Protocol
           </h6>
           <p class="small text-muted mb-3">
-            Items registered through the portal must be surrendered to or claimed from the <strong class="text-white">Student Center Security Desk (Room 102)</strong>.
+            Items registered through the portal must be surrendered to or claimed from the <strong class="text-white"><%= typeof collectionLocation !== 'undefined' ? collectionLocation : 'Student Center Security Desk, Room 102' %></strong>.
           </p>
           <div class="small p-3 rounded-3 text-muted" style="background: #181818; border: 1px solid var(--border-subtle);">
             <i class="bi bi-info-circle me-1" style="color: var(--accent-cyan);"></i> Always bring your official University Student ID for claim collection.

@@ -14,6 +14,7 @@ const { isSupabaseConfigured, testSupabaseConnection } = require('./config/supab
 const dbService = require('./services/dbService');
 const { uploadItemImage, MAX_FILE_SIZE } = require('./services/storageService');
 const SupabaseSessionStore = require('./services/supabaseSessionStore');
+const { sendClaimStatusEmail } = require('./services/emailService');
 const authRoutes = require('./routes/auth');
 const { ensureAuthenticated, ensureAdmin } = require('./middleware/auth');
 const { validateItemReport, validateClaim } = require('./middleware/validation');
@@ -328,6 +329,83 @@ app.post('/items', ensureAuthenticated, upload.single('itemImage'), validateItem
   }
 });
 
+// Edit Item Form (Owner only, open only)
+app.get('/items/:id/edit', ensureAuthenticated, async (req, res) => {
+  try {
+    const item = await dbService.getItemById(req.params.id);
+    if (!item) {
+      return res.status(404).render('pages/errors/404', { title: 'Item Not Found' });
+    }
+    const currentUserId = req.session.user.id || req.session.user._id;
+    const isOwner = item.reportedBy && (item.reportedBy.id === currentUserId || item.reportedBy._id === currentUserId);
+    if (!isOwner || item.status !== 'open') {
+      req.flash('error_msg', 'You can only edit your own open reports.');
+      return res.redirect(`/items/${req.params.id}`);
+    }
+    res.render('pages/items/edit', {
+      title: 'Edit Report',
+      item
+    });
+  } catch (err) {
+    console.error('Error fetching edit report:', err);
+    res.status(500).render('pages/errors/500', { title: 'Server Error' });
+  }
+});
+
+// Update Item Submission (Owner only, open only)
+app.post('/items/:id/edit', ensureAuthenticated, validateItemReport, async (req, res) => {
+  try {
+    const item = await dbService.getItemById(req.params.id);
+    if (!item) {
+      return res.status(404).render('pages/errors/404', { title: 'Item Not Found' });
+    }
+    const currentUserId = req.session.user.id || req.session.user._id;
+    const isOwner = item.reportedBy && (item.reportedBy.id === currentUserId || item.reportedBy._id === currentUserId);
+    if (!isOwner || item.status !== 'open') {
+      req.flash('error_msg', 'You can only edit your own open reports.');
+      return res.redirect(`/items/${req.params.id}`);
+    }
+    const { title, category, location, description, dateLostOrFound } = req.body;
+    await dbService.updateItem(req.params.id, {
+      title,
+      category,
+      location,
+      description,
+      dateLostOrFound: dateLostOrFound ? new Date(dateLostOrFound) : item.dateLostOrFound
+    });
+    req.flash('success_msg', 'Report updated successfully.');
+    res.redirect(`/items/${req.params.id}`);
+  } catch (err) {
+    console.error('Error updating report:', err);
+    req.flash('error_msg', err.message || 'Failed to update report.');
+    res.redirect(`/items/${req.params.id}`);
+  }
+});
+
+// Delete Item Submission (Owner while open, or Admin)
+app.post('/items/:id/delete', ensureAuthenticated, async (req, res) => {
+  try {
+    const item = await dbService.getItemById(req.params.id);
+    if (!item) {
+      return res.status(404).render('pages/errors/404', { title: 'Item Not Found' });
+    }
+    const currentUserId = req.session.user.id || req.session.user._id;
+    const isOwner = item.reportedBy && (item.reportedBy.id === currentUserId || item.reportedBy._id === currentUserId);
+    const isAdmin = req.session.user.role === 'admin';
+    if (!isAdmin && (!isOwner || item.status !== 'open')) {
+      req.flash('error_msg', 'You can only delete your own open reports.');
+      return res.redirect(`/items/${req.params.id}`);
+    }
+    await dbService.deleteItem(req.params.id);
+    req.flash('success_msg', 'Report deleted successfully.');
+    res.redirect('/dashboard');
+  } catch (err) {
+    console.error('Error deleting report:', err);
+    req.flash('error_msg', err.message || 'Failed to delete report.');
+    res.redirect(`/items/${req.params.id}`);
+  }
+});
+
 // ==========================================
 // Routes: Claims Submission (Protected + Validated)
 // ==========================================
@@ -440,6 +518,16 @@ app.post('/admin/claims/:id/approve', ensureAdmin, async (req, res) => {
         type: 'claim_status',
         message: `Great news! Your ownership claim was approved. Collect your item at ${COLLECTION_LOCATION}.`
       });
+
+      if (updatedClaim.claimedBy.email) {
+        sendClaimStatusEmail({
+          to: updatedClaim.claimedBy.email,
+          name: updatedClaim.claimedBy.name,
+          itemTitle: (updatedClaim.item && updatedClaim.item.title) || 'Reported Belonging',
+          status: 'approved',
+          collectionLocation: COLLECTION_LOCATION
+        }).catch(() => {});
+      }
     }
     req.flash('success_msg', 'Claim approved successfully.');
   } catch (err) {
@@ -460,6 +548,16 @@ app.post('/admin/claims/:id/reject', ensureAdmin, async (req, res) => {
         type: 'claim_status',
         message: `Your ownership claim was not approved due to insufficient verification proof.`
       });
+
+      if (updatedClaim.claimedBy.email) {
+        sendClaimStatusEmail({
+          to: updatedClaim.claimedBy.email,
+          name: updatedClaim.claimedBy.name,
+          itemTitle: (updatedClaim.item && updatedClaim.item.title) || 'Reported Belonging',
+          status: 'rejected',
+          collectionLocation: COLLECTION_LOCATION
+        }).catch(() => {});
+      }
     }
     req.flash('info_msg', 'Claim marked as rejected.');
   } catch (err) {
@@ -477,6 +575,31 @@ app.post('/admin/items/:id/status', ensureAdmin, async (req, res) => {
   } catch (err) {
     console.error('Error updating status:', err);
     req.flash('error_msg', 'Failed to update item status.');
+  }
+  res.redirect('/admin');
+});
+
+// Admin Delete Item (Admin Protected)
+app.post('/admin/items/:id/delete', ensureAdmin, async (req, res) => {
+  try {
+    await dbService.deleteItem(req.params.id);
+    req.flash('success_msg', 'Item deleted successfully.');
+  } catch (err) {
+    console.error('Error deleting item:', err);
+    req.flash('error_msg', 'Failed to delete item.');
+  }
+  res.redirect('/admin');
+});
+
+// Admin Update User Role (Admin Protected)
+app.post('/admin/users/:id/role', ensureAdmin, async (req, res) => {
+  try {
+    const { role } = req.body;
+    await dbService.updateUserRole(req.params.id, role);
+    req.flash('success_msg', 'User role updated successfully.');
+  } catch (err) {
+    console.error('Error updating user role:', err);
+    req.flash('error_msg', err.message || 'Failed to update user role.');
   }
   res.redirect('/admin');
 });

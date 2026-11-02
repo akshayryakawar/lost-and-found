@@ -244,6 +244,12 @@
                             Save
                           </button>
                         </form>
+                        <form action="/admin/items/<%= item.id || item._id %>/delete" method="POST" class="d-inline ms-1" onsubmit="return confirm('Permanently delete this item?');">
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                          <button type="submit" class="btn-pill-danger btn-sm px-2" title="Delete Item">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </form>
                       </td>
                     </tr>
                   <% }); %>
@@ -273,9 +279,13 @@
                       </td>
                       <td class="text-muted"><%= u.email %></td>
                       <td>
-                        <span class="badge rounded-pill px-3 py-1" style="background: <%= u.role === 'admin' ? 'rgba(255,90,112,0.15)' : 'rgba(230,242,107,0.15)' %>; color: <%= u.role === 'admin' ? '#ff5a70' : '#e6f26b' %>; border: 1px solid <%= u.role === 'admin' ? 'rgba(255,90,112,0.3)' : 'rgba(230,242,107,0.3)' %>;">
-                          <%= u.role.toUpperCase() %>
-                        </span>
+                        <form action="/admin/users/<%= u.id || u._id %>/role" method="POST" class="d-inline-flex gap-2 align-items-center">
+                          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                          <select name="role" class="form-select form-select-sm" style="width: 105px; font-size: 0.78rem;" onchange="this.form.submit()">
+                            <option value="student" <%= u.role === 'student' ? 'selected' : '' %>>Student</option>
+                            <option value="admin" <%= u.role === 'admin' ? 'selected' : '' %>>Admin</option>
+                          </select>
+                        </form>
                       </td>
                       <td><small class="text-muted"><%= new Date(u.createdAt).toLocaleDateString() %></small></td>
                     </tr>

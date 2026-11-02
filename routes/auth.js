@@ -16,6 +16,12 @@ router.post('/login', ensureGuest, validateLogin, authController.postLogin);
 router.get('/register', ensureGuest, authController.getRegister);
 router.post('/register', ensureGuest, validateRegister, authController.postRegister);
 
+// Password Reset
+router.get('/forgot-password', ensureGuest, authController.getForgotPassword);
+router.post('/forgot-password', ensureGuest, authController.postForgotPassword);
+router.get('/reset-password', ensureGuest, authController.getResetPassword);
+router.post('/reset-password', ensureGuest, authController.postResetPassword);
+
 // Logout
 router.post('/logout', authController.logout);
 router.get('/logout', authController.logout);

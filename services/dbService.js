@@ -373,6 +373,191 @@ const dbService = {
     return item;
   },
 
+  async updateItem(id, updates) {
+    if (isSupabaseConfigured()) {
+      const updatePayload = {};
+      if (updates.title) updatePayload.title = updates.title;
+      if (updates.description) updatePayload.description = updates.description;
+      if (updates.category) updatePayload.category = updates.category;
+      if (updates.location) updatePayload.location = updates.location;
+      if (updates.type) updatePayload.type = updates.type;
+      if (updates.dateLostOrFound) updatePayload.date_lost_or_found = updates.dateLostOrFound;
+      if (updates.imageUrl !== undefined) updatePayload.image_url = updates.imageUrl;
+
+      const { data, error } = await supabase
+        .from('items')
+        .update(updatePayload)
+        .eq('id', id)
+        .select(`
+          id, title, description, type, category, location, date_lost_or_found, image_url, status, created_at,
+          profiles:reported_by (id, name, email, role)
+        `)
+        .single();
+
+      if (error) throw new Error(`Database error updating item: ${error.message}`);
+      return {
+        id: data.id,
+        _id: data.id,
+        title: data.title,
+        description: data.description,
+        type: data.type,
+        category: data.category,
+        location: data.location,
+        dateLostOrFound: data.date_lost_or_found,
+        imageUrl: data.image_url,
+        status: data.status,
+        reportedBy: data.profiles ? {
+          id: data.profiles.id,
+          _id: data.profiles.id,
+          name: data.profiles.name,
+          email: data.profiles.email,
+          role: data.profiles.role
+        } : null,
+        createdAt: data.created_at
+      };
+    }
+
+    const item = memoryItems.find(i => i._id === id || i.id === id);
+    if (!item) throw new Error('Item not found.');
+    if (updates.title) item.title = updates.title;
+    if (updates.description) item.description = updates.description;
+    if (updates.category) item.category = updates.category;
+    if (updates.location) item.location = updates.location;
+    if (updates.type) item.type = updates.type;
+    if (updates.dateLostOrFound) item.dateLostOrFound = updates.dateLostOrFound;
+    if (updates.imageUrl !== undefined) item.imageUrl = updates.imageUrl;
+    return item;
+  },
+
+  async deleteItem(id) {
+    if (isSupabaseConfigured()) {
+      const { error } = await supabase
+        .from('items')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw new Error(`Database error deleting item: ${error.message}`);
+      return true;
+    }
+
+    const idx = memoryItems.findIndex(i => i._id === id || i.id === id);
+    if (idx !== -1) {
+      memoryItems.splice(idx, 1);
+    }
+    return true;
+  },
+
+  async updateUserRole(userId, newRole) {
+    if (!['student', 'admin'].includes(newRole)) {
+      throw new Error('Invalid user role.');
+    }
+
+    if (isSupabaseConfigured()) {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: newRole })
+        .eq('id', userId);
+
+      if (error) throw new Error(`Database error updating user role: ${error.message}`);
+      return true;
+    }
+
+    const profile = memoryProfiles.find(u => u._id === userId || u.id === userId);
+    if (profile) {
+      profile.role = newRole;
+    }
+    return true;
+  },
+
+  async createPasswordResetToken(email) {
+    const crypto = require('crypto');
+    const normalized = (email || '').trim().toLowerCase();
+    const user = await this.findUserWithCredentials(normalized);
+    if (!user) return null;
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour validity
+
+    if (isSupabaseConfigured()) {
+      const { error } = await supabase
+        .from('password_reset_tokens')
+        .insert({
+          user_id: user.id || user._id,
+          token,
+          expires_at: expiresAt.toISOString(),
+          used: false
+        });
+
+      if (error) {
+        console.warn('[Supabase password reset token error]', error.message);
+      }
+    }
+
+    if (!global.memoryResetTokens) global.memoryResetTokens = [];
+    global.memoryResetTokens.push({
+      userId: user.id || user._id,
+      token,
+      expiresAt,
+      used: false
+    });
+
+    return { token, user, expiresAt };
+  },
+
+  async verifyAndConsumePasswordResetToken(token, newPasswordHash) {
+    if (!token) throw new Error('Reset token is required.');
+
+    if (isSupabaseConfigured()) {
+      const { data: record, error } = await supabase
+        .from('password_reset_tokens')
+        .select('id, user_id, expires_at, used')
+        .eq('token', token)
+        .maybeSingle();
+
+      if (!error && record) {
+        if (record.used) {
+          throw new Error('This password reset link has already been used.');
+        }
+        if (new Date(record.expires_at) < new Date()) {
+          throw new Error('This password reset link has expired. Please request a new one.');
+        }
+
+        const { error: updateErr } = await supabase
+          .from('auth_credentials')
+          .update({ password_hash: newPasswordHash, updated_at: new Date().toISOString() })
+          .eq('user_id', record.user_id);
+
+        if (updateErr) throw new Error(`Failed to update password: ${updateErr.message}`);
+
+        await supabase
+          .from('password_reset_tokens')
+          .update({ used: true })
+          .eq('id', record.id);
+
+        return true;
+      }
+    }
+
+    const tokens = global.memoryResetTokens || [];
+    const memRecord = tokens.find(t => t.token === token);
+    if (!memRecord) {
+      throw new Error('Invalid or unrecognized reset token.');
+    }
+    if (memRecord.used) {
+      throw new Error('This password reset link has already been used.');
+    }
+    if (new Date(memRecord.expiresAt) < new Date()) {
+      throw new Error('This password reset link has expired.');
+    }
+
+    memRecord.used = true;
+    const auth = memoryAuth.find(a => a.user_id === memRecord.userId);
+    if (auth) {
+      auth.password_hash = newPasswordHash;
+    }
+    return true;
+  },
+
   // ==========================================
   // Claim Operations
   // ==========================================

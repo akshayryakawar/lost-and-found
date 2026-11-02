@@ -4,6 +4,7 @@
 
 const bcrypt = require('bcryptjs');
 const dbService = require('../services/dbService');
+const { sendPasswordResetEmail } = require('../services/emailService');
 
 /**
  * Render Login Page
@@ -124,4 +125,87 @@ exports.logout = (req, res) => {
     res.clearCookie('campus_session_id');
     res.redirect('/?info=' + encodeURIComponent('You have been safely signed out.'));
   });
+};
+
+/**
+ * Render Forgot Password Page
+ */
+exports.getForgotPassword = (req, res) => {
+  res.render('pages/auth/forgot-password', {
+    title: 'Forgot Password'
+  });
+};
+
+/**
+ * Handle Forgot Password Submission
+ */
+exports.postForgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const result = await dbService.createPasswordResetToken(email);
+    if (result && result.token) {
+      const resetUrl = `${req.protocol}://${req.get('host')}/auth/reset-password?token=${result.token}`;
+      await sendPasswordResetEmail({
+        to: result.user.email,
+        name: result.user.name,
+        resetUrl
+      });
+      if (!process.env.SMTP_HOST) {
+        req.flash('info_msg', `[Demo Mode] Reset link generated: ${resetUrl}`);
+      }
+    }
+    req.flash('success_msg', 'If an account exists with that email address, password reset instructions have been sent.');
+    res.redirect('/auth/forgot-password');
+  } catch (err) {
+    console.error('Forgot password error:', err);
+    req.flash('error_msg', 'An error occurred. Please try again.');
+    res.redirect('/auth/forgot-password');
+  }
+};
+
+/**
+ * Render Reset Password Page
+ */
+exports.getResetPassword = (req, res) => {
+  const { token } = req.query;
+  if (!token) {
+    req.flash('error_msg', 'Missing or invalid password reset token.');
+    return res.redirect('/auth/forgot-password');
+  }
+  res.render('pages/auth/reset-password', {
+    title: 'Reset Password',
+    token
+  });
+};
+
+/**
+ * Handle Reset Password Submission
+ */
+exports.postResetPassword = async (req, res) => {
+  const { token, password, confirmPassword } = req.body;
+  if (!token) {
+    req.flash('error_msg', 'Missing password reset token.');
+    return res.redirect('/auth/forgot-password');
+  }
+  if (!password || password.length < 8) {
+    req.flash('error_msg', 'Password must be at least 8 characters long.');
+    return res.redirect(`/auth/reset-password?token=${encodeURIComponent(token)}`);
+  }
+  if (password !== confirmPassword) {
+    req.flash('error_msg', 'Passwords do not match.');
+    return res.redirect(`/auth/reset-password?token=${encodeURIComponent(token)}`);
+  }
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+    await dbService.verifyAndConsumePasswordResetToken(token, passwordHash);
+
+    req.flash('success_msg', 'Your password has been successfully reset. You can now sign in with your new credentials.');
+    res.redirect('/auth/login');
+  } catch (err) {
+    console.error('Password reset error:', err);
+    req.flash('error_msg', err.message || 'Failed to reset password.');
+    res.redirect('/auth/forgot-password');
+  }
 };

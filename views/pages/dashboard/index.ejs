@@ -160,10 +160,23 @@
                           </span>
                         </td>
                         <td class="text-end">
-                          <a href="/items/<%= report.id || report._id %>" class="btn-pill-ghost btn-sm px-3">
-                            <span>View</span>
-                            <span class="arrow-chip" style="width: 16px; height: 16px; font-size: 0.6rem;">&rarr;</span>
-                          </a>
+                          <div class="d-inline-flex gap-1 align-items-center">
+                            <a href="/items/<%= report.id || report._id %>" class="btn-pill-ghost btn-sm px-2" title="View Details">
+                              <span>View</span>
+                              <span class="arrow-chip" style="width: 14px; height: 14px; font-size: 0.55rem;">&rarr;</span>
+                            </a>
+                            <% if (report.status === 'open') { %>
+                              <a href="/items/<%= report.id || report._id %>/edit" class="btn-pill-ghost btn-sm px-2 text-warning" title="Edit Report">
+                                <i class="bi bi-pencil"></i>
+                              </a>
+                              <form action="/items/<%= report.id || report._id %>/delete" method="POST" class="d-inline m-0" onsubmit="return confirm('Delete this open report?');">
+                                <input type="hidden" name="_csrf" value="<%= typeof csrfToken !== 'undefined' ? csrfToken : '' %>">
+                                <button type="submit" class="btn-pill-danger btn-sm px-2" title="Delete Report">
+                                  <i class="bi bi-trash"></i>
+                                </button>
+                              </form>
+                            <% } %>
+                          </div>
                         </td>
                       </tr>
                     <% }); %>

@@ -68,6 +68,16 @@ CREATE TABLE IF NOT EXISTS public.notifications (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+-- 7. Password Reset Tokens Table
+CREATE TABLE IF NOT EXISTS public.password_reset_tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  token TEXT UNIQUE NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL,
+  used BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- 7. Indexes
 CREATE INDEX IF NOT EXISTS idx_profiles_email ON public.profiles (email);
 CREATE INDEX IF NOT EXISTS idx_auth_credentials_email ON public.auth_credentials (email);
@@ -83,6 +93,7 @@ ALTER TABLE public.user_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.claims ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.password_reset_tokens ENABLE ROW LEVEL SECURITY;
 
 -- 9. Policies (service-role only for sensitive tables, anon read for public data)
 DROP POLICY IF EXISTS "Public profiles access" ON public.profiles;
@@ -95,6 +106,11 @@ DROP POLICY IF EXISTS "Anon read items" ON public.items;
 DROP POLICY IF EXISTS "Service role full claims" ON public.claims;
 DROP POLICY IF EXISTS "Service role full notifications" ON public.notifications;
 DROP POLICY IF EXISTS "Service role full sessions" ON public.user_sessions;
+DROP POLICY IF EXISTS "Service role full reset tokens" ON public.password_reset_tokens;
+
+-- password_reset_tokens: service role only
+CREATE POLICY "Service role full reset tokens" ON public.password_reset_tokens
+  FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- auth_credentials: service role only (no anon access)
 CREATE POLICY "Service role full auth" ON public.auth_credentials

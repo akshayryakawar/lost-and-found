@@ -37,7 +37,7 @@
           <li><a href="/items/report?type=found">Report Found Item</a></li>
           <li><a href="/#howItWorks">How Claiming Works</a></li>
           <li><a href="/auth/login">Student Login</a></li>
-          <% if (currentUser && currentUser.role === 'admin') { %>
+          <% if (typeof currentUser !== 'undefined' && currentUser && currentUser.role === 'admin') { %>
             <li><a href="/admin">Security Console</a></li>
           <% } %>
         </ul>

@@ -17,6 +17,17 @@ let isConfigured = false;
 
 if (supabaseUrl && supabaseKey && !supabaseUrl.includes('your-project-id')) {
   try {
+    // Check JWT payload to warn if anon key is used instead of service_role key
+    const parts = supabaseKey.split('.');
+    if (parts.length === 3) {
+      try {
+        const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf8'));
+        if (payload.role === 'anon') {
+          console.warn('[Supabase Warning] You are using an "anon" key. Note: Sensitive operations (user_sessions, auth_credentials) require the "service_role" secret key from Supabase Dashboard -> Settings -> API.');
+        }
+      } catch (e) {}
+    }
+
     supabase = createClient(supabaseUrl, supabaseKey, {
       auth: {
         persistSession: false

@@ -53,8 +53,11 @@ exports.postLogin = async (req, res) => {
 
     req.flash('success_msg', `Welcome back, ${user.name}!`);
 
-    if (redirectUrl) return res.redirect(redirectUrl);
-    return res.redirect(user.role === 'admin' ? '/admin' : '/dashboard');
+    return req.session.save((err) => {
+      if (err) console.error('Session save warning:', err);
+      if (redirectUrl) return res.redirect(redirectUrl);
+      return res.redirect(user.role === 'admin' ? '/admin' : '/dashboard');
+    });
   } catch (err) {
     console.error('Login error:', err);
     req.flash('error_msg', 'An unexpected error occurred during login. Please try again.');
@@ -106,7 +109,10 @@ exports.postRegister = async (req, res) => {
     };
 
     req.flash('success_msg', 'Registration successful! Welcome to Campus Lost & Found.');
-    res.redirect('/dashboard');
+    return req.session.save((err) => {
+      if (err) console.error('Session save warning:', err);
+      res.redirect('/dashboard');
+    });
   } catch (err) {
     console.error('Registration error:', err);
     req.flash('error_msg', 'Failed to register account. Please check your details and try again.');

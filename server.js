@@ -71,7 +71,8 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   store: isProduction ? new SupabaseSessionStore() : undefined,
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: true,
+  proxy: true,
   cookie: {
     httpOnly: true,
     maxAge: 1000 * 60 * 60 * 24, // 24 hours

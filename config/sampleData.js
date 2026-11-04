@@ -12,6 +12,14 @@ const sampleUsers = [
     createdAt: new Date('2026-09-01T08:00:00Z')
   },
   {
+    _id: 'usr_student',
+    name: 'Student Demo',
+    email: 'student@university.edu',
+    role: 'student',
+    passwordHash: '$2b$10$0LeQpy0RxYFKvKHz/4s6Ju.lcCr8j.wseCMyDknRloRBqbqoSSDqS',
+    createdAt: new Date('2026-09-01T08:00:00Z')
+  },
+  {
     _id: 'usr_002',
     name: 'Sarah Jenkins',
     email: 'sarah.j@university.edu',

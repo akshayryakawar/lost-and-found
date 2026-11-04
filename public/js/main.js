@@ -25,6 +25,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize scroll reveal animations
   initScrollReveal();
+
+  // Handle multipart form submission CSRF preservation
+  const reportForm = document.getElementById('reportItemForm');
+  if (reportForm) {
+    reportForm.addEventListener('submit', () => {
+      const csrfInput = reportForm.querySelector('input[name="_csrf"]');
+      if (csrfInput && csrfInput.value && !reportForm.action.includes('_csrf=')) {
+        const separator = reportForm.action.includes('?') ? '&' : '?';
+        reportForm.action += separator + '_csrf=' + encodeURIComponent(csrfInput.value);
+      }
+    });
+  }
 });
 
 /**

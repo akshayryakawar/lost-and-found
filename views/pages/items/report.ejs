@@ -33,7 +33,7 @@
 
     <!-- Glass Form Card -->
     <div class="glass-panel p-4 p-md-5">
-      <form action="/items" method="POST" enctype="multipart/form-data" id="reportItemForm" class="needs-validation" novalidate>
+      <form action="/items?_csrf=<%= csrfToken %>" method="POST" enctype="multipart/form-data" id="reportItemForm" class="needs-validation" novalidate>
         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
         <!-- Segmented Type Selector -->
         <div class="mb-4 text-center">

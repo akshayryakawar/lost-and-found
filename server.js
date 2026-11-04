@@ -92,11 +92,19 @@ app.use((req, res, next) => {
   next();
 });
 
-// CSRF error handler
+// CSRF & Multer error handler
 app.use((err, req, res, next) => {
   if (err.code === 'EBADCSRFTOKEN') {
     req.flash('error_msg', 'Form session expired. Please try again.');
-    return res.redirect('back');
+    return req.session.save(() => {
+      res.redirect('back');
+    });
+  }
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    req.flash('error_msg', 'Uploaded image exceeds the 5MB file size limit.');
+    return req.session.save(() => {
+      res.redirect('back');
+    });
   }
   next(err);
 });

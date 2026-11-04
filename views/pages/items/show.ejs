@@ -98,12 +98,12 @@
               <%= item.type === 'lost' ? 'Lost Item' : 'Found Item' %>
             </span>
 
-            <span class="badge badge-status status-<%= item.status %> px-3 py-2">
-              Status: <%= item.status.replace('_', ' ').toUpperCase() %>
+            <span class="badge badge-status status-<%= item.status || 'open' %> px-3 py-2">
+              Status: <%= (item.status || 'open').replace('_', ' ').toUpperCase() %>
             </span>
 
             <span class="badge px-3 py-2 rounded-pill ms-auto" style="background: #181818; color: var(--text-muted); border: 1px solid var(--border-subtle); font-size: 0.75rem;">
-              Ref: <%= (item.id || item._id).toString().substring(0, 8) %>
+              Ref: <%= (item.id || item._id || '').toString().substring(0, 8) %>
             </span>
           </div>
 

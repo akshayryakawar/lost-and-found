@@ -25,7 +25,7 @@
         <div class="col-md-7">
           <div class="d-flex align-items-center gap-3">
             <div class="rounded-circle d-flex align-items-center justify-content-center fs-3 fw-bold" style="width: 58px; height: 58px; background: rgba(230,242,107,0.15); color: var(--accent-lime); border: 1px solid rgba(230,242,107,0.3);">
-              <%= currentUser.name.charAt(0).toUpperCase() %>
+              <%= (currentUser.name || 'User').charAt(0).toUpperCase() %>
             </div>
             <div>
               <h2 class="h3 fw-bold text-white mb-0"><%= currentUser.name %></h2>
@@ -155,8 +155,8 @@
                           <div class="small text-muted"><%= new Date(report.dateLostOrFound || report.date_lost_or_found).toLocaleDateString() %></div>
                         </td>
                         <td>
-                          <span class="badge badge-status status-<%= report.status %>">
-                            <%= report.status.replace('_', ' ').toUpperCase() %>
+                          <span class="badge badge-status status-<%= report.status || 'open' %>">
+                            <%= (report.status || 'open').replace('_', ' ').toUpperCase() %>
                           </span>
                         </td>
                         <td class="text-end">

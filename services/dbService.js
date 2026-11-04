@@ -8,6 +8,7 @@ const { sampleUsers, sampleItems, sampleClaims, sampleNotifications } = require(
 
 let idCounter = 1000;
 const generateId = (prefix) => `${prefix}_${Date.now()}_${(++idCounter).toString(36)}`;
+const isUUID = (val) => typeof val === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
 
 // ==========================================
 // Shared Data Mappers
@@ -276,7 +277,7 @@ const dbService = {
   },
 
   async getItemById(id) {
-    if (isSupabaseConfigured()) {
+    if (isSupabaseConfigured() && isUUID(id)) {
       try {
         const { data, error } = await supabase
           .from('items')
@@ -300,7 +301,24 @@ const dbService = {
 
   async createItem(itemData) {
     if (isSupabaseConfigured()) {
-      const reporterId = itemData.reportedBy ? (itemData.reportedBy.id || itemData.reportedBy) : null;
+      let reporterId = null;
+      const rawReporterId = itemData.reportedBy ? (itemData.reportedBy.id || itemData.reportedBy._id || itemData.reportedBy) : null;
+      if (isUUID(rawReporterId)) {
+        reporterId = rawReporterId;
+      } else if (itemData.reportedBy && itemData.reportedBy.email) {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('email', itemData.reportedBy.email.trim().toLowerCase())
+            .maybeSingle();
+          if (profile && profile.id && isUUID(profile.id)) {
+            reporterId = profile.id;
+          }
+        } catch (e) {
+          console.warn('[Supabase profile lookup warning]', e.message);
+        }
+      }
 
       const { data, error } = await supabase
         .from('items')
@@ -321,7 +339,10 @@ const dbService = {
         `)
         .single();
 
-      if (error) throw new Error(`Database error: ${error.message}`);
+      if (error) {
+        console.error('[Supabase createItem Error]', error.message);
+        throw new Error(`Database error: ${error.message}`);
+      }
       return mapItem(data);
     }
 
@@ -338,7 +359,7 @@ const dbService = {
   },
 
   async updateItemStatus(id, newStatus) {
-    if (isSupabaseConfigured()) {
+    if (isSupabaseConfigured() && isUUID(id)) {
       const { error } = await supabase
         .from('items')
         .update({ status: newStatus })
@@ -354,7 +375,7 @@ const dbService = {
   },
 
   async updateItem(id, updates) {
-    if (isSupabaseConfigured()) {
+    if (isSupabaseConfigured() && isUUID(id)) {
       const updatePayload = {};
       if (updates.title) updatePayload.title = updates.title;
       if (updates.description) updatePayload.description = updates.description;
@@ -391,7 +412,7 @@ const dbService = {
   },
 
   async deleteItem(id) {
-    if (isSupabaseConfigured()) {
+    if (isSupabaseConfigured() && isUUID(id)) {
       const { error } = await supabase
         .from('items')
         .delete()
@@ -533,8 +554,8 @@ const dbService = {
             profiles:claimed_by (id, name, email, role)
           `);
 
-        if (itemId) query = query.eq('item_id', itemId);
-        if (claimedBy) query = query.eq('claimed_by', claimedBy);
+        if (itemId && isUUID(itemId)) query = query.eq('item_id', itemId);
+        if (claimedBy && isUUID(claimedBy)) query = query.eq('claimed_by', claimedBy);
         if (status) query = query.eq('status', status);
 
         const { data, error } = await query.order('created_at', { ascending: false });
@@ -549,61 +570,79 @@ const dbService = {
 
     let claims = [...memoryClaims];
     if (itemId) claims = claims.filter(c => c.itemId === itemId);
-    if (claimedBy) claims = claims.filter(c => c.claimedBy && c.claimedBy.id === claimedBy);
+    if (claimedBy) claims = claims.filter(c => c.claimedBy && (c.claimedBy.id === claimedBy || c.claimedBy._id === claimedBy));
     if (status) claims = claims.filter(c => c.status === status);
     return claims;
   },
 
   async createClaim({ itemId, claimedBy, message, proofDescription }) {
-    const claimantId = claimedBy.id || claimedBy;
+    const claimantIdentifier = claimedBy ? (claimedBy.id || claimedBy._id || claimedBy) : null;
+    let dbClaimantUuid = isUUID(claimantIdentifier) ? claimantIdentifier : null;
 
-    if (isSupabaseConfigured()) {
-      // 1. Check item availability
-      const { data: itemData, error: itemErr } = await supabase
-        .from('items')
-        .select('id, status, title')
-        .eq('id', itemId)
-        .maybeSingle();
-
-      if (itemErr) throw new Error(`Database error fetching item: ${itemErr.message}`);
-      if (!itemData) throw new Error('Item not found.');
-      if (itemData.status === 'claimed' || itemData.status === 'returned') {
-        throw new Error('This item is no longer available for claims.');
+    if (isSupabaseConfigured() && isUUID(itemId)) {
+      if (!dbClaimantUuid && claimedBy && claimedBy.email) {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('email', claimedBy.email.trim().toLowerCase())
+            .maybeSingle();
+          if (profile && profile.id && isUUID(profile.id)) {
+            dbClaimantUuid = profile.id;
+          }
+        } catch (e) {
+          console.warn('[Supabase claimant profile lookup warning]', e.message);
+        }
       }
 
-      // 2. Check for duplicate claim by same user
-      const { data: existingClaims, error: checkErr } = await supabase
-        .from('claims')
-        .select('id')
-        .eq('item_id', itemId)
-        .eq('claimed_by', claimantId);
+      if (dbClaimantUuid) {
+        // 1. Check item availability
+        const { data: itemData, error: itemErr } = await supabase
+          .from('items')
+          .select('id, status, title')
+          .eq('id', itemId)
+          .maybeSingle();
 
-      if (checkErr) throw new Error(`Database error checking duplicate claim: ${checkErr.message}`);
-      if (existingClaims && existingClaims.length > 0) {
-        throw new Error('You have already submitted a claim for this item.');
+        if (itemErr) throw new Error(`Database error fetching item: ${itemErr.message}`);
+        if (!itemData) throw new Error('Item not found.');
+        if (itemData.status === 'claimed' || itemData.status === 'returned') {
+          throw new Error('This item is no longer available for claims.');
+        }
+
+        // 2. Check for duplicate claim by same user
+        const { data: existingClaims, error: checkErr } = await supabase
+          .from('claims')
+          .select('id')
+          .eq('item_id', itemId)
+          .eq('claimed_by', dbClaimantUuid);
+
+        if (checkErr) throw new Error(`Database error checking duplicate claim: ${checkErr.message}`);
+        if (existingClaims && existingClaims.length > 0) {
+          throw new Error('You have already submitted a claim for this item.');
+        }
+
+        // 3. Insert claim
+        const { data, error } = await supabase
+          .from('claims')
+          .insert({
+            item_id: itemId,
+            claimed_by: dbClaimantUuid,
+            message: message || '',
+            proof_description: proofDescription,
+            status: 'pending'
+          })
+          .select(`
+            id, item_id, message, proof_description, status, created_at,
+            items:item_id (id, title, type, category, location, status),
+            profiles:claimed_by (id, name, email, role)
+          `)
+          .single();
+
+        if (error) throw new Error(`Database error submitting claim: ${error.message}`);
+
+        await supabase.from('items').update({ status: 'under_review' }).eq('id', itemId);
+        return mapClaim(data);
       }
-
-      // 3. Insert claim
-      const { data, error } = await supabase
-        .from('claims')
-        .insert({
-          item_id: itemId,
-          claimed_by: claimantId,
-          message: message || '',
-          proof_description: proofDescription,
-          status: 'pending'
-        })
-        .select(`
-          id, item_id, message, proof_description, status, created_at,
-          items:item_id (id, title, type, category, location, status),
-          profiles:claimed_by (id, name, email, role)
-        `)
-        .single();
-
-      if (error) throw new Error(`Database error submitting claim: ${error.message}`);
-
-      await supabase.from('items').update({ status: 'under_review' }).eq('id', itemId);
-      return mapClaim(data);
     }
 
     // Memory fallback mode
@@ -615,7 +654,7 @@ const dbService = {
 
     const existingClaim = memoryClaims.find(c =>
       c.itemId === itemId &&
-      c.claimedBy && (c.claimedBy.id === claimantId || c.claimedBy === claimantId)
+      c.claimedBy && (c.claimedBy.id === claimantIdentifier || c.claimedBy._id === claimantIdentifier || c.claimedBy === claimantIdentifier)
     );
     if (existingClaim) {
       throw new Error('You have already submitted a claim for this item.');
@@ -715,7 +754,7 @@ const dbService = {
   // Notification Operations
   // ==========================================
   async getNotifications(userId) {
-    if (isSupabaseConfigured() && userId) {
+    if (isSupabaseConfigured() && userId && isUUID(userId)) {
       try {
         const { data, error } = await supabase
           .from('notifications')
@@ -735,7 +774,7 @@ const dbService = {
   },
 
   async createNotification({ userId, message, type = 'system' }) {
-    if (isSupabaseConfigured() && userId) {
+    if (isSupabaseConfigured() && userId && isUUID(userId)) {
       try {
         await supabase.from('notifications').insert({
           user_id: userId,
@@ -761,7 +800,7 @@ const dbService = {
   },
 
   async markNotificationsRead(userId) {
-    if (isSupabaseConfigured() && userId) {
+    if (isSupabaseConfigured() && userId && isUUID(userId)) {
       try {
         await supabase
           .from('notifications')

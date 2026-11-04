@@ -227,8 +227,8 @@
                       <td><small><i class="bi bi-geo-alt me-1" style="color: var(--accent-pink);"></i><%= item.location %></small></td>
                       <td><small class="text-muted"><%= item.reportedBy ? item.reportedBy.name : 'Unknown' %></small></td>
                       <td>
-                        <span class="badge badge-status status-<%= item.status %>">
-                          <%= item.status.replace('_', ' ').toUpperCase() %>
+                        <span class="badge badge-status status-<%= item.status || 'open' %>">
+                          <%= (item.status || 'open').replace('_', ' ').toUpperCase() %>
                         </span>
                       </td>
                       <td class="text-end">

@@ -92,11 +92,17 @@ exports.postReportItem = async (req, res) => {
     });
 
     req.flash('success_msg', 'Item report registered successfully!');
-    res.redirect(`/items/${newItem.id}`);
+    return req.session.save((err) => {
+      if (err) console.error('Session save warning on report create:', err);
+      res.redirect(`/items/${newItem.id}`);
+    });
   } catch (err) {
     console.error('Error creating item:', err);
     req.flash('error_msg', err.message || 'Failed to register item.');
-    res.redirect('/items/report');
+    return req.session.save((saveErr) => {
+      if (saveErr) console.error('Session save warning on report failure:', saveErr);
+      res.redirect('/items/report');
+    });
   }
 };
 
@@ -112,20 +118,25 @@ exports.getItemDetails = async (req, res) => {
     }
 
     // Proper potential match cross-referencing: opposite type, same category, and title keyword overlap
-    const itemsList = (await dbService.getItems({ limit: 100 })).items;
-    const titleWords = item.title.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-    const potentialMatch = itemsList.find(other => {
-      const isDifferent = other.id !== item.id;
-      if (!isDifferent) return false;
-      const isOppositeType = other.type !== item.type;
-      const isSameCategory = other.category === item.category;
-      const otherTitle = (other.title || '').toLowerCase();
-      const hasKeywordOverlap = titleWords.some(w => otherTitle.includes(w));
-      return isOppositeType && isSameCategory && hasKeywordOverlap;
-    });
+    let potentialMatch = null;
+    try {
+      const itemsResult = await dbService.getItems({ limit: 100 });
+      const itemsList = (itemsResult && itemsResult.items) ? itemsResult.items : [];
+      const titleWords = (item.title || '').toLowerCase().split(/\s+/).filter(w => w.length > 2);
+      potentialMatch = itemsList.find(other => {
+        if (!other || other.id === item.id) return false;
+        const isOppositeType = other.type !== item.type;
+        const isSameCategory = other.category === item.category;
+        const otherTitle = (other.title || '').toLowerCase();
+        const hasKeywordOverlap = titleWords.some(w => otherTitle.includes(w));
+        return isOppositeType && isSameCategory && hasKeywordOverlap;
+      }) || null;
+    } catch (matchErr) {
+      console.warn('Potential match calculation notice:', matchErr.message);
+    }
 
     res.render('pages/items/show', {
-      title: item.title,
+      title: item.title || 'Belonging File',
       item,
       potentialMatch
     });

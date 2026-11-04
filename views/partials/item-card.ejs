@@ -50,7 +50,7 @@
         <% if (item.reportedBy && item.reportedBy.name) { %>
           <li>
             <i class="bi bi-person-fill text-muted"></i>
-            <span>Reported by <%= item.reportedBy.name.split(' ')[0] %></span>
+            <span>Reported by <%= (item.reportedBy.name || 'User').toString().split(' ')[0] %></span>
           </li>
         <% } %>
       </ul>

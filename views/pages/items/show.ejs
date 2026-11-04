@@ -93,7 +93,7 @@
 
           <!-- Header Tags & Title -->
           <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
-            <span class="badge px-3 py-2 rounded-pill fw-bold text-uppercase" style="background: <%= item.type === 'lost' ? 'var(--lost-bg)' : 'var(--found-bg)' %>; color: <%= item.type === 'lost' ? 'var(--lost-color)' : 'var(--found-color)' %>; border: 1px solid <%= item.type === 'lost' ? 'var(--lost-border)' : 'var(--found-border)' %>;">
+            <span class="badge px-3 py-2 rounded-pill fw-bold text-uppercase <%= item.type === 'lost' ? 'badge-lost' : 'badge-found' %>">
               <i class="bi <%= item.type === 'lost' ? 'bi-exclamation-circle' : 'bi-check-circle' %> me-1"></i>
               <%= item.type === 'lost' ? 'Lost Item' : 'Found Item' %>
             </span>

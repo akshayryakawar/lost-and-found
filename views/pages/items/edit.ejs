@@ -27,7 +27,7 @@
         <!-- Type Selector (Readonly indicator) -->
         <div class="mb-4 text-center">
           <label class="form-label d-block small text-uppercase fw-bold mb-2" style="color: var(--accent-lime); letter-spacing: 0.06em;">Report Type</label>
-          <span class="badge px-4 py-2 rounded-pill fw-bold" style="background: <%= item.type === 'lost' ? 'var(--lost-bg)' : 'var(--found-bg)' %>; color: <%= item.type === 'lost' ? 'var(--lost-color)' : 'var(--found-color)' %>; border: 1px solid <%= item.type === 'lost' ? 'var(--lost-border)' : 'var(--found-border)' %>;">
+          <span class="badge px-4 py-2 rounded-pill fw-bold <%= item.type === 'lost' ? 'badge-lost' : 'badge-found' %>">
             <i class="bi <%= item.type === 'lost' ? 'bi-search' : 'bi-plus-circle' %> me-1"></i>
             <%= item.type === 'lost' ? 'Lost Item' : 'Found Item' %>
           </span>

@@ -220,7 +220,7 @@
                         </div>
                       </td>
                       <td>
-                        <span class="badge rounded-pill px-3 py-1" style="background: <%= item.type === 'lost' ? 'var(--lost-bg)' : 'var(--found-bg)' %>; color: <%= item.type === 'lost' ? 'var(--lost-color)' : 'var(--found-color)' %>; border: 1px solid <%= item.type === 'lost' ? 'var(--lost-border)' : 'var(--found-border)' %>;">
+                        <span class="badge rounded-pill px-3 py-1 <%= item.type === 'lost' ? 'badge-lost' : 'badge-found' %>">
                           <%= item.type.toUpperCase() %>
                         </span>
                       </td>

@@ -15,10 +15,27 @@ const upload = multer({
   limits: { fileSize: MAX_FILE_SIZE }
 });
 
+// Multer error handler for the report route
+function handleUpload(req, res, next) {
+  upload.single('itemImage')(req, res, (err) => {
+    if (err) {
+      let message = 'Image upload failed.';
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        message = 'Uploaded image exceeds the 5MB file size limit.';
+      } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+        message = 'Unexpected file field. Please use the designated image upload area.';
+      }
+      req.flash('error_msg', message);
+      return req.session.save(() => res.redirect('/items/report'));
+    }
+    next();
+  });
+}
+
 // Item listings and search
 router.get('/', itemController.getItems);
 router.get('/report', ensureAuthenticated, itemController.getReportForm);
-router.post('/', ensureAuthenticated, upload.single('itemImage'), validateItemReport, itemController.postReportItem);
+router.post('/', ensureAuthenticated, handleUpload, validateItemReport, itemController.postReportItem);
 
 // Item details, editing, and deletion
 router.get('/:id', itemController.getItemDetails);
